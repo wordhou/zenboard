@@ -3,7 +3,14 @@
   background-color: magenta;
   clear: both;
 }
+#header ul.nav-bar {
+  overflow: auto;
+}
 
+#header ul.nav-bar li {
+  float: left;
+  margin-left: 1em;
+}
 #footer {
   clear: both;
   background-color: magenta;

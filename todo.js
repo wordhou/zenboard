@@ -1,4 +1,6 @@
-/** Builds a new board with no tasks and default style */
+/** Stores the state of a board.
+  * @constructor
+  * @param serializedBoard - uses this string to load */
 function Board(serializedBoard) {
   if (serializedBoard === undefined) {
     this.name = '';
@@ -15,7 +17,6 @@ function Board(serializedBoard) {
     }
   }
 }
-
 
 /** Encodes the board state into a string */
 Board.prototype.serialize = function () {
@@ -85,11 +86,12 @@ Board.prototype.attachEventListenersToTask = function (task) {
 
   var x0, y0;
   const grab = event => {
-    if (task.pin) return;
-    x0 = parseInt(e.style.left) - event.x;
-    y0 = parseInt(e.style.top) - event.y;
-    this.element.addEventListener('mousemove', dragLater);
-    this.element.addEventListener('mouseup', drop);
+    if (!task.pin) {
+      x0 = parseInt(e.style.left) - event.x;
+      y0 = parseInt(e.style.top) - event.y;
+      this.element.addEventListener('mousemove', dragLater);
+      this.element.addEventListener('mouseup', drop);
+    }
   };
   const drag = event => {
     task.x = clamp (0, x0 + event.x, this.width - Task.WIDTH);
@@ -183,7 +185,7 @@ Task.prototype.createHtml = function () {
 
 Task.prototype.toggle = function (property) {
   if (typeof(this[property]) === 'boolean') {
-    this[property] = !this.property;
+    this[property] = !this[property];
     this.element.getElementsByClassName(property)[0].classList.toggle('on');
   }
 };
