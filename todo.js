@@ -1,19 +1,72 @@
+const clamp = (a, b, c) => Math.max(a, Math.min(b, c));
+const $ = document.getElementById;
+const $$ = document.querySelector;
+const MAX_TEXT_HEIGHT = 100;
+const DRAG_DELAY = 5;
+
+/**
+ * Manages the global state of the application as well as saving and
+ * loading information from localStorage.
+ */
+function State () {
+  // Loads the boards list and settings from localStorage, sets defaults
+  // if the don't exist
+  const boards = localStorage.getItem('boards');
+  const current = localStorage.getItem('current');
+  const settings = localStorage.getItem('settings');
+  if (boards === null) {
+    this.current = new Board({name: 'Default', width: 1024, height: 768});
+    this.boards = ['Default'];
+  } else {
+    this.boards = JSON.parse(boards);
+    this.current = JSON.parse(current);
+  }
+  this.current = current === null ? boards[0] : current;
+  this.settings = settings === null ? {} : JSON.parse(settings);
+}
+
+State.prototype.loadBoard = function (boardName) {
+  if (this.boards.includes(boardName)) {
+    this.board = boardName;
+    this.
+  } else {
+    console.error('Invalid board name');
+  }
+};
+
+State.prototype.addBoard = function () {
+};
+
+State.prototype.renameBoard = function () {
+};
+
+State.prototype.deleteBoard = function () {
+};
+
+
 /** Stores the state of a board.
   * @constructor
-  * @param serializedBoard - uses this string to load */
-function Board(serializedBoard) {
-  if (serializedBoard === undefined) {
+  * @param string - Constructs a board from a serialized string
+  * @param object - Constructs a board using the object's properties
+  * @param undefined - Constructs a board with default properties
+  */
+function Board(parameter) {
+  const props = ['name', 'template', 'width', 'height'];
+  if (typeof(parameter) === 'undefined') {
     this.name = '';
     this.tasks = new Map();
     this.template = 'basic';
     this.width = 1024;
     this.height = 768;
-  } else {
-    const obj = JSON.parse(serializedBoard);
+  } else if (typeof(parameter) === 'string') {
+    const obj = JSON.parse(parameter);
     this.tasks = new Map(JSON.parse(obj.tasks));
-    const props = ['name', 'template', 'width', 'height'];
-    for (let key in props) {
+    for (let key of props) {
       this[key] = obj[key];
+    }
+  } else if (typeof(parameter) === 'object') {
+    for (let key of props) {
+      this[key] = parameter[key];
     }
   }
 }
@@ -29,6 +82,7 @@ Board.prototype.serialize = function () {
   return JSON.stringify(obj);
 };
 
+/** Renders this board by adding all its tasks to the DOM*/
 Board.prototype.render = function () {
   const element = document.createElement('div');
   element.id = 'board';
@@ -36,7 +90,7 @@ Board.prototype.render = function () {
   this.element.style.width = `${this.width}px`;
   this.element.style.height = `${this.height}px`;
 
-  // Replaces the element `<div id="board">` with our newly rendered element
+  // Replaces the element `<div id="board">` with our new element
   const oldBoard = document.getElementById('board');
   oldBoard.parentNode.replaceChild(this.element, oldBoard);
 
@@ -94,7 +148,7 @@ Board.prototype.attachEventListenersToTask = function (task) {
     }
   };
   const drag = event => {
-    task.x = clamp (0, x0 + event.x, this.width - Task.WIDTH);
+    task.x = clamp (0, x0 + event.x, this.width - e.offsetWidth);
     task.y = clamp (0, y0 + event.y, 100000);
     e.style.left = task.x + 'px';
     e.style.top = task.y + 'px';
@@ -161,8 +215,6 @@ function Task (
   this.element.style.left = `${this.x}px`;
   this.element.style.top = `${this.y}px`;
 }
-
-Task.WIDTH = 200;
 
 Task.prototype.createHtml = function () {
   const e = document.createElement('div');
@@ -231,10 +283,6 @@ function BoardTemplate () {
   this.image = '';
   this.style = {};
 }
-const clamp = (a, b, c) => Math.max(a, Math.min(b, c));
-const MAX_TEXT_HEIGHT = 100;
-const DRAG_DELAY = 5;
-
 function autoResize(textarea) {
   const resize = function () {
     textarea.style.height = 'auto';
@@ -247,9 +295,6 @@ function autoResize(textarea) {
   textarea.addEventListener('input', () => setTimeout(resize, 0));
   setTimeout(resize, 0);
 }
-
-const $ = document.getElementById;
-const $$ = document.querySelector;
 
 window.addEventListener('load', () => {
   const board = new Board();
