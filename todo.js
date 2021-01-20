@@ -1,46 +1,81 @@
 const clamp = (a, b, c) => Math.max(a, Math.min(b, c));
-const $ = document.getElementById;
-const $$ = document.querySelector;
+const $ = id => document.getElementById(id);
+const $$ = sel => document.querySelector(sel);
 const MAX_TEXT_HEIGHT = 100;
 const DRAG_DELAY = 5;
+
+var state; // DEBUG
 
 /**
  * Manages the global state of the application as well as saving and
  * loading information from localStorage.
  */
 function State () {
-  // Loads the boards list and settings from localStorage, sets defaults
-  // if the don't exist
   const boards = localStorage.getItem('boards');
   const current = localStorage.getItem('current');
   const settings = localStorage.getItem('settings');
+
+  this.settings = settings === null ? {} : JSON.parse(settings);
   if (boards === null) {
-    this.current = new Board({name: 'Default', width: 1024, height: 768});
     this.boards = ['Default'];
+    this.current = 'Default';
+    this.board = new Board({name: 'Default', width: 1024, height: 768});
+    this.save();
   } else {
     this.boards = JSON.parse(boards);
-    this.current = JSON.parse(current);
+    this.current = current;
+    this.board = new Board(localStorage.getItem(`board-${current}`));
   }
-  this.current = current === null ? boards[0] : current;
-  this.settings = settings === null ? {} : JSON.parse(settings);
+
+  this.loadBoard();
 }
 
-State.prototype.loadBoard = function (boardName) {
-  if (this.boards.includes(boardName)) {
-    this.board = boardName;
-    this.
-  } else {
-    console.error('Invalid board name');
-  }
+State.prototype.save = function () {
+  localStorage.setItem('current', this.current);
+  localStorage.setItem('boards', JSON.stringify(this.boards));
+  localStorage.setItem('settings', JSON.stringify(this.settings));
 };
 
+State.prototype.loadBoard = function () {
+  this.board.render();
+};
+
+
 State.prototype.addBoard = function () {
+  this.save();
 };
 
 State.prototype.renameBoard = function () {
+  this.save();
 };
 
 State.prototype.deleteBoard = function () {
+  this.save();
+};
+
+State.prototype.attachEventListenersToDocument = function () {
+  $('addBoard').addEventListener('click', () => {
+  });
+  $('deleteBoard').addEventListener('click', () => {
+  });
+  $('switchBoard').addEventListener('click', () => {
+  });
+  $('renameBoard').addEventListener('click', () => {
+  });
+  $('newTask').addEventListener('click', () => {
+    const task = this.board.newTask();
+    // TODO: On click, add task to random? board position;
+    // On hold, create drag and drop event listeners.
+    task.element.getElementsByTagName('textarea')[0].focus();
+  });
+  $('tileBoard').addEventListener('click', () => {
+  });
+  $('shuffleBoard').addEventListener('change', () => () => {
+  });
+  $('setSort').addEventListener('change', () => () => {
+  });
+  $('changeTemplate').addEventListener('change', () => () => {
+  });
 };
 
 
@@ -51,31 +86,41 @@ State.prototype.deleteBoard = function () {
   * @param undefined - Constructs a board with default properties
   */
 function Board(parameter) {
-  const props = ['name', 'template', 'width', 'height'];
-  if (typeof(parameter) === 'undefined') {
+  const type = typeof(parameter);
+  if (type === 'undefined') {
     this.name = '';
     this.tasks = new Map();
     this.template = 'basic';
     this.width = 1024;
     this.height = 768;
-  } else if (typeof(parameter) === 'string') {
-    const obj = JSON.parse(parameter);
-    this.tasks = new Map(JSON.parse(obj.tasks));
-    for (let key of props) {
-      this[key] = obj[key];
-    }
-  } else if (typeof(parameter) === 'object') {
-    for (let key of props) {
+    this.save();
+  } else if (type === 'object') {
+    this.tasks = new Map();
+    for (let key of Board.copyProps) {
       this[key] = parameter[key];
     }
+    this.save();
+  } else if (type === 'string') {
+    const obj = JSON.parse(parameter);
+    // TODO this bit of code here is a bit ugly.
+    // Takes the tasks array and replaces all the values (plain objects) with a 
+    // new Task object. This in turn generates the DOM elements that later get
+    // attached to the board DOM element.
+    this.tasks = new Map(obj.tasks.map(a => [a[0], new Task(a[1])]));
+    for (let key of Board.copyProps) {
+      this[key] = obj[key];
+    }
+  } else {
+    console.error('Problem loading board from localStorage.');
   }
 }
 
+Board.copyProps = ['name', 'template', 'width', 'height'];
+
 /** Encodes the board state into a string */
 Board.prototype.serialize = function () {
-  const props = ['name', 'template', 'width', 'height'];
   const obj = {};
-  for (let key in props) {
+  for (let key of Board.copyProps) {
     obj[key] = this[key];
   }
   obj.tasks = Array.from(this.tasks.entries());
@@ -94,6 +139,8 @@ Board.prototype.render = function () {
   const oldBoard = document.getElementById('board');
   oldBoard.parentNode.replaceChild(this.element, oldBoard);
 
+  console.log(this.tasks.values()); //DEBUG
+
   for (let task of this.tasks.values()) {
     element.appendChild(task.element);
     this.attachEventListenersToTask(task);
@@ -107,15 +154,27 @@ Board.prototype.render = function () {
 Board.prototype.attachEventListenersToTask = function (task) {
   const e = task.element;
   const text = e.getElementsByTagName('textarea')[0];
-  autoResize(text);
+
+  const resize = function () {
+    text.style.height = 'auto';
+    text.style.height =
+    clamp(0, text.scrollHeight, MAX_TEXT_HEIGHT) + 'px';
+  };
+  text.addEventListener('change', resize);
+  text.addEventListener('cut', () => setTimeout(resize, 0));
+  text.addEventListener('paste', () => setTimeout(resize, 0));
+  text.addEventListener('input', () => setTimeout(resize, 0));
+  setTimeout(resize, 0);
+
   text.addEventListener('change', () => {
     task.text = text.value;
-    this.save;
+    console.log('Text change event, saving...'); //DEBUG
+    this.save();
   });
   const due = e.getElementsByClassName('due')[0];
   text.addEventListener('change', () => {
     task.due = due.value;
-    this.save;
+    this.save();
   });
   e.getElementsByClassName('expander')[0].addEventListener('click', () => {
     task.toggle('expand');
@@ -157,6 +216,7 @@ Board.prototype.attachEventListenersToTask = function (task) {
   const drop = () => {
     this.element.removeEventListener('mousemove', dragLater);
     this.element.removeEventListener('mouseup', drop);
+    console.log('Saving from end of drag-and-drop event'); //DEBUG
     this.save();
   };
   e.addEventListener('mousedown', grab);
@@ -168,10 +228,12 @@ Board.prototype.newTask = function () {
   this.tasks.set(task.created, task);
   this.element.appendChild(task.element);
   this.attachEventListenersToTask(task);
+  return task;
 };
 
 Board.prototype.save = function () {
   localStorage.setItem(`board-${this.name}`, this.serialize());
+  console.log(localStorage.getItem(`board-${this.name}`));
 };
 
 Board.prototype.rename = function (newName) {
@@ -188,7 +250,6 @@ Board.prototype.resize = function (width, height) {
   this.height = height;
   this.element.style.width = `${width}px`;
   this.element.style.height = `${height}px`;
-  // TODO: move all
 };
 
 /**
@@ -242,26 +303,6 @@ Task.prototype.toggle = function (property) {
   }
 };
 
-Task.prototype.toggleExpand = function () {
-  this.expand = !this.expand;
-  this.element.getElementsByClassName('expand')[0].classList.toggle('on');
-};
-
-Task.prototype.toggleFlag = function () {
-  this.flag = !this.flag;
-  this.element.getElementsByClassName('flag')[0].classList.toggle('on');
-};
-
-Task.prototype.toggleDone = function () {
-  this.done = !this.done;
-  this.element.getElementsByClassName('done')[0].classList.toggle('on');
-};
-
-Task.prototype.togglePin = function () {
-  this.pin = !this.pin;
-  this.element.getElementsByClassName('pin')[0].classList.toggle('on');
-};
-
 Task.prototype.promptDelete = function () {
   const confirmed = confirm('Are you sure you want to delete?');
   if (confirmed)
@@ -274,30 +315,13 @@ Task.prototype.delete = function () {
   dispatchEvent(e);
 };
 
-Task.prototype.update = function () {
-};
-
-
 /** Describes the background and size of a Board */
-function BoardTemplate () {
+/*function BoardTemplate () {
   this.image = '';
   this.style = {};
-}
-function autoResize(textarea) {
-  const resize = function () {
-    textarea.style.height = 'auto';
-    textarea.style.height =
-      clamp(0, textarea.scrollHeight, MAX_TEXT_HEIGHT) + 'px';
-  };
-  textarea.addEventListener('change', resize);
-  textarea.addEventListener('cut', () => setTimeout(resize, 0));
-  textarea.addEventListener('paste', () => setTimeout(resize, 0));
-  textarea.addEventListener('input', () => setTimeout(resize, 0));
-  setTimeout(resize, 0);
-}
+}*/
 
 window.addEventListener('load', () => {
-  const board = new Board();
-  board.render();
-  board.newTask();
+  state = new State();
+  state.attachEventListenersToDocument();
 });

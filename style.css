@@ -28,11 +28,12 @@
 
 #board {
   float: left;
+  position: relative;
   background-color: lightgray;
 }
 
 .todo {
-  position: relative;
+  position: absolute;
   font-family: Helvetica;
   box-sizing: border-box;
   width: 200px;
@@ -51,6 +52,11 @@
 .todo:active:hover {
   box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.2);
   background-color: lightyellow;
+}
+
+.todo:focus-within {
+  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.2);
+  background-color: yellow;
 }
 
 .todo-left {
