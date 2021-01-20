@@ -1,22 +1,35 @@
-div {
-  padding: 0;
-  margin: 0;
-  border: none;
+#header {
+  width: 100%;
+  background-color: magenta;
+  clear: both;
+}
+
+#footer {
+  clear: both;
+  background-color: magenta;
+  width: 100%;
+}
+
+#main {
+  overflow: auto;
+}
+
+#sidebar {
+  float: left;
+  height: 100%;
 }
 
 #board {
-  margin-left: 50px;
+  float: left;
   background-color: lightgray;
-  width: 900px;
-  height: 100vh;
 }
 
 .todo {
   position: relative;
   font-family: Helvetica;
+  box-sizing: border-box;
   width: 200px;
   height: auto;
-  margin: 0;
   padding: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   background-color: lightgoldenrodyellow;
@@ -62,33 +75,30 @@ div {
   height: auto;
   font-family: Helvetica;
 }
-
 .todo textarea:focus {
 }
 
-.expandible {
+.todo .due {
+}
+
+.expand {
   overflow: hidden;
   height: 0;
   transition: all 0.5s ease;
 }
-
-.expandible.expanded {
-  height: 1.25em;
+.expand.on {
+  height: 1.2em;
 }
 
 ul.icons {
   width: 100%;
-  margin: 0;
-  padding: 0;
   overflow: hidden;
   list-style-type: none;
 }
-
 ul.icons li {
   margin: 0 2px 0 2px;
   float: left;
 }
-
 ul.icons li:last-child {
   float: right;
   clear: none;
@@ -99,35 +109,32 @@ ul.icons a svg {
   height: 20px;
   fill: lightgray;
 }
-
 ul.icons svg symbol {
   width: 20px;
   height: 20px;
 }
 
-ul.icons .check.selected svg {
+ul.icons .done.on svg {
   fill: olivedrab;
 }
-ul.icons li:hover .check.selected svg {
+ul.icons li:hover .done.on svg {
   fill: darkseagreen;
 }
-ul.icons .flag.selected svg {
+ul.icons .flag.on svg {
   fill: firebrick;
 }
-ul.icons li:hover .flag.selected svg {
+ul.icons li:hover .flag.on svg {
   fill: indianred;
 }
-ul.icons .pin.selected svg {
+ul.icons .pin.on svg {
   fill: deepskyblue;
 }
-ul.icons li:hover .pin.selected svg {
+ul.icons li:hover .pin.on svg {
   fill: lightskyblue;
 }
-
 ul.icons li:hover svg {
   fill: darkslategray;
 }
-
 ul.icons input {
   font-family: Arial;
 }
