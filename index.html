@@ -9,15 +9,22 @@
 <body>
   <div id="header">
     <h1>Header content</h1>
-    <ul class="nav-bar">
-      <li><a id="addBoard">Add new board</a></li>
-      <li><a id="switchBoard">Boards</a></li>
-      <li><a id="deleteBoard">Delete board</a></li>
-      <li><a id="renameBoard">Rename board</a></li>
-    </ul>
   </div>
   <div id="main">
-    <div id="sidebar">
+    <div id="boards-drawer">
+      <div id="boards-drawer-expandible">
+        <ul id="boards-drawer-header">
+          <li><h1>Boards</h1></li>
+          <li id="delete-board">delete</li>
+          <li id="new-board">new</li>
+        </ul>
+        <div id="board-list">
+        </div>
+      </div>
+      <div id="boards-drawer-handle">handle</div>
+    </div>
+
+    <div id="nav-drawer">
       <ul>
         <li><a id="newTask">New</a></li>
         <li><a id="tileBoard">Tile?</a></li>
@@ -27,7 +34,7 @@
       </ul>
     </div>
 
-<div id="board">
+<div id="board-wrapper">
 </div>
 
 </div>

@@ -21,14 +21,45 @@
   overflow: auto;
 }
 
-#sidebar {
+#nav-drawer {
   float: left;
   height: 100%;
+}
+
+#boards-drawer {
+  float: left;
+}
+#boards-drawer-expandible {
+  float: left;
+}
+#boards-drawer-handle {
+  float: right;
+  background-color: yellow;
+  height: 100%;
+}
+#boards-drawer-header {
+  clear: both;
+  overflow: auto;
+  background-color: burlywood;
+}
+
+#boards-drawer-header li {
+  float: left;
+  margin-left: 1em;
+}
+
+.board-listing-component {
+}
+
+.board-listing-component.on {
+  font-weight: bold;
+  background-color: grey;
 }
 
 #board {
   float: left;
   position: relative;
+  height: 800px;
   background-color: lightgray;
 }
 
@@ -45,13 +76,13 @@
   overflow: auto;
 }
 
-.todo:hover {
-  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
+.todo.on {
+  background-color: lightyellow;
+  box-shadow: 2px 6px 8px rgba(0, 0, 0, 0.4);
 }
 
-.todo:active:hover {
-  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.2);
-  background-color: lightyellow;
+.todo:hover {
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
 }
 
 .todo:focus-within {
