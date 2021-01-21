@@ -2,8 +2,6 @@ const clamp = (a, b, c) => Math.max(a, Math.min(b, c));
 const MAX_TEXT_HEIGHT = 100;
 const DRAG_DELAY = 5;
 
-var state; // DEBUG
-
 State.DEFAULT_BOARD_NAME = 'Default Board';
 State.NEW_BOARD_NAME = 'New Board';
 
@@ -31,6 +29,8 @@ State.prototype.load = function() {
   } else {
     this._setupNew();
   }
+
+  this._addHandlers();
 };
 
 /** Used when no existing boards are found in localStorage */
@@ -57,7 +57,7 @@ State.prototype._setBoard = function (board) {
 State.prototype._styleActiveListing = function () {
   for (let board of this.boards.values()) {
     console.log(board, this.current===board.name);
-    board.listingElement.classList.toggle('on', this.current === board.name);
+    board.listingNode.classList.toggle('on', this.current === board.name);
   }
 };
 
@@ -91,7 +91,7 @@ State.prototype.loadBoard = function (boardName) {
 
 /**
  * Adds a Board object to the board list, renders the listing, and
- * adds the listing element to the boardListNode
+ * adds the listingNode to the boardListNode
  */
 State.prototype.addBoard = function (board) {
   if (this.boards.has(board.name)) {
@@ -105,7 +105,7 @@ State.prototype.addBoard = function (board) {
 
 State.prototype._attachListing = function (board) {
   board.renderListing();
-  this.boardListNode.appendChild(board.listingElement);
+  this.boardListNode.appendChild(board.listingNode);
   board.addHandlersToListing();
 };
 
@@ -139,7 +139,7 @@ State.prototype._deleteBoard = function (boardName) {
   console.log('deleting');
   const board = this.boards.get(boardName);
   board.deleteTasks();
-  board.listingElement.remove();
+  board.listingNode.remove();
   this.boards.delete(boardName); 
   this.save();
 };
@@ -159,10 +159,23 @@ State.prototype.deleteBoard = function () {
   }
 };
 
-State.prototype.addHandlers = function () {
+State.prototype._addHandlers = function () {
+  const $ = id => document.getElementById(id); // Alias for brevity
+
   document.addEventListener('selectboard', event => {
     this.loadBoard(event.detail);
   }, true);
+
+  $('newTask').addEventListener('click', () => {
+    const task = this.board.addTask(new Task({x: 200, y: 200}));
+
+    // TODO: On click, add task to random? board position;
+    // On hold, create drag and drop event listeners.
+    task.node.getElementsByTagName('textarea')[0].focus();
+  });
+
+  $('new-board').addEventListener('click', () => this.newBoard());
+  $('delete-board').addEventListener('click', () => this.deleteBoard());
 };
 
 /** Stores the state of a board. @constructor */
@@ -171,7 +184,6 @@ function Board({
   description = '',
   template = 'default',
   width=1024,
-  element,
   tasks
 }) {
   this.name = name;
@@ -179,26 +191,27 @@ function Board({
   this.template = template;
   this.width = width;
   this.tasks = tasks === undefined ? new Map() : tasks;
-  this.element = element;
 }
 
+Board.storableProperties = ['name', 'description', 'template', 'width'];
+
 Board.prototype.toJSON = function () {
-  return { name: this.name
-    , description: this.description
-    , template: this.template
-    , width: this.width };
+  const obj = {};
+  Board.storableProperties.map( key => obj[key] = this[key] );
+  return obj;
 };
 
 /** Renders this board and attaches it to the DOM node */
-Board.prototype.attach = function (node) {
+Board.prototype.attach = function (target) {
   const element = document.createElement('div');
   element.id = 'board';
-  this.element = element;
-  this.element.style.width = `${this.width}px`;
+  element.style.width = `${this.width}px`;
+
+  this.node = element;
 
   // Replaces the element `<div id="board">` with our new element
-  node.innerHTML = '';
-  node.appendChild(element);
+  target.innerHTML = '';
+  target.appendChild(element);
 
   for (let task of this.tasks.values()) {
     this.addTask(task);
@@ -211,9 +224,9 @@ Board.prototype.attach = function (node) {
 Board.prototype.addTask = function (task) {
   this.tasks.set(task.created, task);
   task.render();
-  this.element.appendChild(task.element); // TODO ??
-  task.element.style.left = `${task.x}px`;
-  task.element.style.top = `${task.y}px`;
+  this.node.appendChild(task.node); // TODO ??
+  task.node.style.left = `${task.x}px`;
+  task.node.style.top = `${task.y}px`;
   task.addHandlers();
   this.saveTasks();
   return task;
@@ -229,9 +242,8 @@ Board.prototype.deleteTasks = function () {
 };
 
 Board.prototype.addHandlers = function () {
-  this.element.addEventListener('taskchange', () => this.saveTasks());
-
-  this.element.addEventListener('taskdelete', e => this.deleteTask(e.detail));
+  this.node.addEventListener('taskchange', () => this.saveTasks());
+  this.node.addEventListener('taskdelete', e => this.deleteTask(e.detail));
 
   this.makeTasksDraggable();
   // TODO: Drag to resize feature. Attach event listener to element and
@@ -249,15 +261,20 @@ Board.prototype.makeTasksDraggable = function () {
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.dropEffect = 'move';
 
-    t.element.classList.toggle('on');
-    setTimeout(() => t.element.classList.toggle('on'), 10);
+    /* TODO: This section doesn't appear to work. Its intended purpose is to 
+     * style the object just before it's dragged so that the browser caches a
+     * newly styled object as the Drag Image
+     */
+    t.node.classList.toggle('on');
+    setTimeout(() => t.node.classList.toggle('on'), 10);
 
     if (!t.pin) {
       x0 = t.x - event.x;
       y0 = t.y - event.y;
       task = t;
-      //TODO holdmybeer this.element.addEventListener('mousemove', dragLater);
-      //this.element.addEventListener('dragend', drop);
+
+      // Uses the drop event document to get final mouse coordinates as a
+      // workaround for a bug in Firefox
       document.addEventListener('drop', drop);
       document.addEventListener('dragover', dragoverHandler);
     }
@@ -270,17 +287,16 @@ Board.prototype.makeTasksDraggable = function () {
 
   const drop = event => {
     event.preventDefault();
-    task.x = clamp (0, x0 + event.x, this.width - task.element.offsetWidth);
+    task.x = clamp (0, x0 + event.x, this.width - task.node.offsetWidth);
     task.y = clamp (0, y0 + event.y, 100000);
-    task.element.style.left = task.x + 'px';
-    task.element.style.top = task.y + 'px';
-    // this.element.removeEventListener('mousemove', dragLater);
+    task.node.style.left = task.x + 'px';
+    task.node.style.top = task.y + 'px';
     document.removeEventListener('drop', drop);
     document.removeEventListener('dragover', dragoverHandler);
     this.saveTasks();
   };
 
-  this.element.addEventListener('dragstart', event => {
+  this.node.addEventListener('dragstart', event => {
     // Check whether ancestor contains class
     let elem = event.target;
     while (!elem.classList.contains('todo') && elem.id !== 'board') {
@@ -292,11 +308,9 @@ Board.prototype.makeTasksDraggable = function () {
     }
     return false;
   });
-
-  // this.element.addEventListener('drag', event => event.preventDefault());
 };
 
-/** Creates the DOM node for the board listing this.listingElement */
+/** Creates the DOM node for the board listing this.listingNode */
 Board.prototype.renderListing = function () {
   const e = document.createElement('div');
   e.className = 'board-listing-component';
@@ -306,24 +320,44 @@ Board.prototype.renderListing = function () {
       <a class="select-board">
       <div class="board-listing-icon">O</div>
       <div class="board-listing-main">
-        <h1>${this.name}</h1>
-        <h2>${this.description}</h2>
+        <div class="board-listing-name">
+          <label>
+            <h1>${this.name}</h1>
+            <input value="${this.name}">
+          </label>
+        </div>
+        <div class="board-listing-description">
+          <label>
+            <h2>${this.description}</h2>
+            <input value="${this.description}">
+          </label>
+        </div>
       </div>
       </a>
     </li>`;
-  this.listingElement = e;
-  return e;
+  this.listingNode = e;
+  // References to DOM components of the listing element
+  this.listingNodes = {
+    select : e.querySelector('.select-board'),
+    name : e.querySelector('.board-listing-name'),
+    nameText : e.querySelector('.board-listing-name h1'),
+    nameInput : e.querySelector('.board-listing-name input'),
+    description : e.querySelector('.board-listing-description'),
+    descriptionText : e.querySelector('.board-listing-description h1'),
+    descriptionInput : e.querySelector('.board-listing-description input')
+  };
 };
 
 Board.prototype.addHandlersToListing = function () {
-  const select = this.listingElement.getElementsByClassName('select-board')[0];
-  select.addEventListener('click', () => {
+  this.listingNodes.select.addEventListener('click', () => {
     const e = new CustomEvent('selectboard', { detail: this.name, bubbles: true });
-    this.listingElement.dispatchEvent(e);
+    this.listingNode.dispatchEvent(e);
   });
+};
 
-  // TODO Click on name: create input to change name
-  // TODO Click on description: create input to change description
+/** Action that makes the listing name editable and focuses on it */
+Board.prototype.editName = function () {
+  // Replace h1 with an input
 };
 
 /** The board's tasks are saved to localStorage in an array of values */
@@ -334,14 +368,16 @@ Board.prototype.saveTasks = function () {
 
 Board.prototype.resize = function (width) {
   this.width = width;
-  this.element.style.width = `${width}px`;
+  this.node.style.width = `${width}px`;
   this.markChanged();
 };
 
 Board.prototype.markChanged = function () {
   const e = new CustomEvent('boardchange', { bubbles: true });
-  this.element.dispatchEvent(e);
+  this.node.dispatchEvent(e);
 };
+
+
 
 /**
  * Represents a task as well as its position in the canvas
@@ -365,18 +401,24 @@ function Task (
   this.y = y;
   this.z = z;
   this.created = created === undefined ? (new Date()).toJSON() : created;
-  this.element = this.render();
-  this.element.style.left = `${this.x}px`;
-  this.element.style.top = `${this.y}px`;
+  this.render();
+  this.node.style.left = `${this.x}px`;
+  this.node.style.top = `${this.y}px`;
 }
 
+// List of property names that are stored in localStorage
+Task.storableProperties = ['text', 'due', 'done', 'pin', 'flag', 'expand',
+  'x', 'y', 'z', 'created'];
+
 Task.prototype.toJSON = function () {
-  const obj = Object.assign({}, this);
-  delete obj.element;
+  const obj = {};
+  for ( let key of Task.storableProperties ) {
+    obj[key] = this[key];
+  }
   return obj;
 };
 
-/** Populates the .element property with a generated HTML element */
+/** Populates the .node property with a generated HTML element */
 Task.prototype.render = function () {
   const e = document.createElement('div');
   e.className = 'todo';
@@ -395,67 +437,71 @@ Task.prototype.render = function () {
     <li><a class="flag${this.flag ? ' on' : ''}"><svg><use href="#flag" /></svg></img></a> </li>
     <li><a class="trash"><svg><use href="#trash" /></svg></img></a> </li>
     </ul>`;
-  this.element = e;
-  return e;
+  // References to DOM components of the listing element
+  this.nodes = {
+    text : e.querySelector('textarea'),
+    due : e.querySelector('.due'),
+    expander : e.querySelector('.expander'),
+    expand : e.querySelector('.expand'),
+    done : e.querySelector('.done'),
+    flag : e.querySelector('.flag'),
+    pin : e.querySelector('.pin'),
+    trash : e.querySelector('.trash'),
+  };
+  this.node = e;
 };
 
 Task.prototype.addHandlers = function() {
-  const e = this.element;
-  const text = e.getElementsByTagName('textarea')[0];
-
-  const resizeTextarea = function () {
-    text.style.height = 'auto';
-    text.style.height = clamp(0, text.scrollHeight, MAX_TEXT_HEIGHT) + 'px';
+  const resizeTextarea = () => {
+    this.nodes.text.style.height = 'auto';
+    this.nodes.text.style.height = clamp(0, this.nodes.text.scrollHeight, MAX_TEXT_HEIGHT) + 'px';
   };
-  text.addEventListener('change', resizeTextarea);
-  text.addEventListener('cut', () => setTimeout(resizeTextarea, 0));
-  text.addEventListener('paste', () => setTimeout(resizeTextarea, 0));
-  text.addEventListener('input', () => setTimeout(resizeTextarea, 0));
+  this.nodes.text.addEventListener('change', resizeTextarea);
+  this.nodes.text.addEventListener('cut', () => setTimeout(resizeTextarea, 0));
+  this.nodes.text.addEventListener('paste', () => setTimeout(resizeTextarea, 0));
+  this.nodes.text.addEventListener('input', () => setTimeout(resizeTextarea, 0));
   setTimeout(resizeTextarea, 0);
 
-  text.addEventListener('change', () => {
-    this.text = text.value;
+  this.nodes.text.addEventListener('change', () => {
+    this.text = this.nodes.text.value;
     this.markChanged();
   });
 
-  const due = e.getElementsByClassName('due')[0];
-  text.addEventListener('change', () => {
-    this.due = due.value;
+  this.nodes.due.addEventListener('change', () => {
+    this.due = this.nodes.due.value;
     this.markChanged();
   });
 
   //TODO see if I can refactor this to be less repetitive
-  e.getElementsByClassName('expander')[0].addEventListener('click', () => {
+  this.nodes.expander.addEventListener('click', () => {
     this.toggle('expand');
     this.markChanged();
   });
-  e.getElementsByClassName('done')[0].addEventListener('click', () => {
+  this.nodes.done.addEventListener('click', () => {
     this.toggle('done');
     this.markChanged();
   });
-  e.getElementsByClassName('pin')[0].addEventListener('click', () => {
+  this.nodes.pin.addEventListener('click', () => {
     this.toggle('pin');
-    this.element.setAttribute('draggable', this.pin ? 'false' : 'true');
+    this.node.setAttribute('draggable', this.pin ? 'false' : 'true');
     this.markChanged();
   });
-  e.getElementsByClassName('flag')[0].addEventListener('click', () => {
+  this.nodes.flag.addEventListener('click', () => {
     this.toggle('flag');
     this.markChanged();
   });
-  e.getElementsByClassName('trash')[0].addEventListener('click', () => {
-    this.promptDelete();
-  });
+  this.nodes.trash.addEventListener('click', () => this.promptDelete());
 };
 
 Task.prototype.markChanged = function () {
-  const e = new CustomEvent('taskchange',{ bubbles: true, detail: true });
-  this.element.dispatchEvent(e);
+  const e = new CustomEvent('taskchange', { bubbles: true, detail: true });
+  this.node.dispatchEvent(e);
 };
 
 Task.prototype.toggle = function (property) {
   if (typeof(this[property]) === 'boolean') {
     this[property] = !this[property];
-    this.element.getElementsByClassName(property)[0].classList.toggle('on');
+    this.nodes[property].classList.toggle('on');
   }
 };
 
@@ -467,40 +513,15 @@ Task.prototype.promptDelete = function () {
 
 Task.prototype.delete = function () {
   const e = new CustomEvent('taskdelete', { bubbles: true, detail: this });
-  this.element.dispatchEvent(e);
-  this.element.remove();
+  this.node.dispatchEvent(e);
+  this.node.remove();
 };
 
-/** Describes the background and size of a Board */
-/*function BoardTemplate () {
-  this.image = '';
-  this.style = {};
-}*/
-
-
-function addEventListenersToDocument (state) {
-  document.getElementById('newTask').addEventListener('click', () => {
-    const task = state.board.addTask(new Task({x: 200, y: 200}));
-
-    // TODO: On click, add task to random? board position;
-    // On hold, create drag and drop event listeners.
-    task.element.getElementsByTagName('textarea')[0].focus();
-  });
-
-  document.getElementById('new-board').addEventListener('click', () => {
-    state.newBoard();
-  });
-  document.getElementById('delete-board').addEventListener('click', () => {
-    state.deleteBoard();
-  });
-}
-
+var state; // DEBUG
 window.addEventListener('load', () => {
   state = new State({
     boardNode: document.getElementById('board-wrapper'),
     boardListNode: document.getElementById('board-list')
   });
   state.load();
-  state.addHandlers();
-  addEventListenersToDocument (state);
 });
