@@ -21,40 +21,127 @@ Board.prototype.toJSON = function () {
   return obj;
 };
 
-/** Creates a new task, adds it to the boards map, and attaches it to the doc */
-Board.prototype.addTask = function (task) {
-  this.tasks.set(task.created, task);
-  this.saveTasks();
-  this.attachTask(task);
-  return task;
-};
+// Updates the state and the DOM
+Board.prototype.newTask = function (props = {}) {
+  const task = new Task(props);
+  this.tasks.set(task);
 
-/** Adds a task to the board DOM and the board.tasks map */
-Board.prototype.attachTask = function (task) {
-  if (task.node === undefined) task.render();
-  this.node.appendChild(task.node);
-  return task;
-};
+  if (task.x === undefined) {
+    // TODO generate x,y values
+    task.x = 200;
+    task.y = 200;
+  }
+  if (task.category === undefined)
+  return this.addTask(task);
+}
+
+
+// Reindexes the category values
+Board.prototype.removeTaskFromCategory = function (task) {
+  const taskNodes = Array.from(this.categoryNodes[task.category].children);
+  const tasks = taskNodes.map(node => this.tasks.get(node.dataset.created));
+  tasks.forEach(t => { if (t.order >= task.order) {
+    t.order++;
+    t.setStyles();
+  }
+  });
+  task.order = undefined;
+}
+
+/**
+ * Sets the tasks category and position values and attaches the task to the DOM 
+ * @param task - A task object 
+ * @param cat - Category. If unspecified, uses the template default category.
+ * @param pos - The position to attach to. If unspecified, adds to the end.
+ */
+Board.prototype.addTask = function (task, cat, pos) {
+  // TODO Check if cat is reasonable and throw error otherwise
+  const temp = Template.templates.get(this.templates);
+  task.category = cat === undefined ? temp.def : cat;
+
+ /*Sets the category orders to allow another task to be insterted at a position.
+  * If position is not given, it calculates the minimum unused index in the
+  * category and also returns the value. */
+  const taskNodes = Array.from(this.categoryNodes[cat].children);
+  const tasks = taskNodes.map(node => this.tasks.get(node.dataset.created));
+  if (pos === undefined) {
+    const orders = tasks.map(task => task.order);
+    pos = 1;
+    while (orders.includes(pos))
+      pos++
+    task.order = pos;
+    task.setStyles();
+  } else {
+    tasks.forEach(t => { if (t.order >= pos) {
+        t.order++;
+        t.setStyles();
+      } });
+  }
+
+  this.saveTasks();
+  task.attach(this.categoryNodes[cat]);
+}
+
+Board.prototype.setCategoryOrders = function(cat, pos) {
+  const taskNodes = Array.from(this.categoryNodes[cat].children);
+  const tasks = taskNodes.map(node => this.tasks.get(node.dataset.created));
+  const orders = tasks.map(task => task.order);
+  if (pos === undefined) {
+    pos = 1;
+    while (orders.includes(pos))
+      pos++
+    return pos;
+  }
+  tasks.forEach(task => { if (task.order >= pos) task.order++; });
+  return pos;
+}
+
+/**
+ * Sets the task.category property, updates the category orders, and updates the DOM.
+ */
+Board.prototype.moveTaskToCategory = function (task, cat, pos) {
+  if (task.category !== cat) this.removeTaskFromCategory(task);
+  this.addTask(task, cat, pos);
+}
 
 Board.prototype.render = function () {
+  console.log(Template.default);
   const element = document.createElement('div');
   element.classList.add('board');
   element.style.width = `${this.width}px`;
   this.node = element;
 
-  for (let task of this.tasks.values()) {
-    this.attachTask(task);
+  const temp = Template.templates.get(this.template);
+
+  this.categoryNodes = {};
+
+  for (let cat in temp.categories) { // TODO maybe move to method
+    const catElement = document.createElement('div');
+    catElement.className = `category cat-${cat}`;
+    this.categoryNodes[cat] = catElement;
+    this.node.appendChild(catElement);
   }
+
+  // Add the tasks
+  this.tasks.forEach(task => this.addTask(task));
 
   this.addHandlers();
 }
 
-/** Renders this board and attaches it to the DOM node */
+/** Makes sure board is rendered and attaches it to the DOM target node */
 Board.prototype.attach = function (target) {
   if (this.node === undefined) this.render();
   // Replaces the element `<div id="board">` with our new element
   target.innerHTML = '';
   target.appendChild(this.node);
+};
+
+/** Creates a new task, adds it to the boards map, and attaches it to the doc */
+Board.prototype.addTask = function (task) {
+  this.tasks.set(task.created, task);
+  this.saveTasks();
+  this.attachTask(task); // TODO MAKE SURE THIS WORKS WITH NEW CATEGORY LOGIC
+  return task;
 };
 
 Board.prototype.addHandlers = function () {
@@ -132,7 +219,9 @@ Board.prototype.loadTasks = function () {
 };
 
 Board.prototype.deleteTask = function (task) {
+  this.removeTaskFromCategory(task);
   this.tasks.delete(task.created);
+  task.node.remove();
   this.saveTasks();
 };
 

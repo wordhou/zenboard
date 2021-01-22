@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Default",
+    "categories": ["Todo"],
+    "def": "todo"
+  },
+  {
+    "name": "Trefoil",
+    "categories": ["Todo", "In Progress", "Completed"],
+    "def": "todo"
+  }
+]

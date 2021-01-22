@@ -1,4 +1,4 @@
-/* global $, clamp, autoResize, Task, Board */
+/* global $, clamp, autoResize, Template, Task, Board */
 
 /**
  * Manages the global state of the application as well as saving and
@@ -50,6 +50,14 @@ State.prototype._setBoard = function (board) {
   this._styleActiveListing();
   this.save();
 };
+
+State.prototype.changeTemplate = function (board, template) {
+  board.template = template;
+  if (this.board === board) {
+    board.render();
+    board.attach(this.boardNode);
+  }
+}
 
 State.prototype._styleActiveListing = function () {
   for (let board of this.boards.values()) {
@@ -142,7 +150,7 @@ State.prototype.newBoard = function () {
 State.prototype._deleteBoard = function (boardName) {
   console.log('deleting');
   const board = this.boards.get(boardName);
-  board.deleteTasks();
+  board.deleteTasksFromStorage();
   board.listingNode.remove();
   this.boards.delete(boardName); 
 };
@@ -179,7 +187,7 @@ State.prototype._addHandlers = function () {
   document.addEventListener('boardchange', () => this.save());
 
   $('new-task').addEventListener('click', () => {
-    const task = this.board.addTask(new Task({x: 200, y: 200}));
+    const task = this.board.newTask();
 
     // TODO: On click, add task to random? board position;
     // On hold, create drag and drop event listeners.

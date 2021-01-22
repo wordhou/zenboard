@@ -1,11 +1,5 @@
 /* global $, clamp, autoResize, State, Task, Board */
 
-function Template () {
-}
-
-Template.default = '{}';
-
-
 var state; // DEBUG:
 window.addEventListener('load', () => {
   (() => {

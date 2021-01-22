@@ -10,8 +10,9 @@ function Task (
     , pin = false
     , flag = false
     , expand = false
-    , z = -100
-    , x, y, created}) {
+    , x, y, z = 0
+    , category, i
+    , created}) {
   this.text = text;
   this.due = due;
   this.done = done;
@@ -21,6 +22,8 @@ function Task (
   this.x = x;
   this.y = y;
   this.z = z;
+  this.order = i;
+  this.category = category;
   this.created = created === undefined ? (new Date()).toJSON() : created;
   this.render();
   this.node.style.left = `${this.x}px`;
@@ -29,7 +32,7 @@ function Task (
 
 // List of property names that are stored in localStorage
 Task.storableProperties = ['text', 'due', 'done', 'pin', 'flag', 'expand',
-  'x', 'y', 'z', 'created'];
+  'x', 'y', 'z', 'category', 'i', 'created'];
 
 Task.prototype.toJSON = function () {
   const obj = {};
@@ -70,13 +73,18 @@ Task.prototype.render = function () {
     trash : e.querySelector('.trash'),
   };
 
-  // Set styles
-  e.style.left = `${this.x}px`;
-  e.style.top = `${this.y}px`;
+  this.setStyles();
 
   this.node = e;
   this.addHandlers();
 };
+
+Task.prototype.setStyles = function () {
+  this.node.style.left = `${this.x}px`;
+  this.node.style.top = `${this.y}px`;
+  this.node.style.zIndex = `${this.z}`;
+  this.node.style.order = `${this.order}`;
+}
 
 Task.prototype.addHandlers = function() {
   autoResize(this.nodes.text);
@@ -111,6 +119,11 @@ Task.prototype.addHandlers = function() {
   this.nodes.trash.addEventListener('click', () => this.promptDelete());
 };
 
+Task.prototype.attach = function (target) {
+  if (this.node === undefined) this.render();
+  target.appendChild(this.node);
+}
+
 Task.prototype.markChanged = function () {
   const e = new CustomEvent('taskchange', { bubbles: true, detail: true });
   this.node.dispatchEvent(e);
@@ -132,6 +145,5 @@ Task.prototype.promptDelete = function () {
 Task.prototype.delete = function () {
   const e = new CustomEvent('taskdelete', { bubbles: true, detail: this });
   this.node.dispatchEvent(e);
-  this.node.remove();
 };
 
