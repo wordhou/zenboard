@@ -1,3 +1,7 @@
+body {
+  font-size: 12pt;
+}
+
 .indicator .open,
 .indicator.expanded .close {
   display: none;

@@ -26,54 +26,35 @@ Board.prototype.addTask = function (task) {
   this.tasks.set(task.created, task);
   this.saveTasks();
   this.attachTask(task);
+  return task;
 };
 
 /** Adds a task to the board DOM and the board.tasks map */
 Board.prototype.attachTask = function (task) {
   if (task.node === undefined) task.render();
   this.node.appendChild(task.node);
-  task.addHandlers();
   return task;
 };
 
-/** Renders this board and attaches it to the DOM node */
-Board.prototype.attach = function (target) {
+Board.prototype.render = function () {
   const element = document.createElement('div');
   element.classList.add('board');
   element.style.width = `${this.width}px`;
-
   this.node = element;
-
-  // Replaces the element `<div id="board">` with our new element
-  target.innerHTML = '';
-  target.appendChild(element);
 
   for (let task of this.tasks.values()) {
     this.attachTask(task);
   }
 
   this.addHandlers();
-};
+}
 
-/** Loads from localStorage to populate the tasks property with Tasks */
-Board.prototype.loadTasks = function () {
-  const tasksStored = localStorage.getItem(`tasks-${this.name}`);
-  const tasksStr = tasksStored !== null ? tasksStored : 'null';
-
-  if (tasksStored === null)
-    return new Error(`Couldn't load tasks for board '${this.name}' from localStorage.`);
-
-  this.tasks = new Map(JSON.parse(tasksStr).map( props =>
-    [props.created, new Task(props)]));
-};
-
-Board.prototype.deleteTask = function (task) {
-  this.tasks.delete(task.created);
-  this.saveTasks();
-};
-
-Board.prototype.deleteTasksFromStorage = function () {
-  localStorage.removeItem(`tasks-${this.name}`);
+/** Renders this board and attaches it to the DOM node */
+Board.prototype.attach = function (target) {
+  if (this.node === undefined) this.render();
+  // Replaces the element `<div id="board">` with our new element
+  target.innerHTML = '';
+  target.appendChild(this.node);
 };
 
 Board.prototype.addHandlers = function () {
@@ -138,6 +119,27 @@ Board.prototype.makeTasksDraggable = function () {
   });
 };
 
+/** Loads from localStorage to populate the tasks property with Tasks */
+Board.prototype.loadTasks = function () {
+  const tasksStored = localStorage.getItem(`tasks-${this.name}`);
+  const tasksStr = tasksStored !== null ? tasksStored : 'null';
+
+  if (tasksStored === null)
+    return this.tasks = new Map();
+
+  return this.tasks = new Map(JSON.parse(tasksStr).map( props =>
+    [props.created, new Task(props)]));
+};
+
+Board.prototype.deleteTask = function (task) {
+  this.tasks.delete(task.created);
+  this.saveTasks();
+};
+
+Board.prototype.deleteTasksFromStorage = function () {
+  localStorage.removeItem(`tasks-${this.name}`);
+};
+
 /** Creates the DOM node for the board listing this.listingNode */
 Board.prototype.renderListing = function () {
   const e = document.createElement('div');
@@ -179,6 +181,8 @@ Board.prototype.renderListing = function () {
     editName: e.querySelector('.edit-name'),
     editDescription: e.querySelector('.edit-description')
   };
+
+  this.addHandlersToListing();
 };
 
 Board.prototype.addHandlersToListing = function () {
@@ -227,6 +231,7 @@ Board.prototype._dispatchRenameBoardEvent = function (newName) {
 
 /** The board's tasks are saved to localStorage in an array of values */
 Board.prototype.saveTasks = function () {
+
   const taskString = JSON.stringify(Array.from(this.tasks.values()));
   localStorage.setItem(`tasks-${this.name}`, taskString);
 };

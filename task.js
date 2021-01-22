@@ -1,3 +1,5 @@
+/* global autoResize  */
+
 /**
  * Represents a task as well as its position in the canvas
  */
@@ -73,6 +75,7 @@ Task.prototype.render = function () {
   e.style.top = `${this.y}px`;
 
   this.node = e;
+  this.addHandlers();
 };
 
 Task.prototype.addHandlers = function() {

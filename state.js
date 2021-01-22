@@ -39,15 +39,16 @@ State.prototype._setupNew = function () {
   defaultBoard.saveTasks();
   this.addBoard(defaultBoard);
   this._setBoard(defaultBoard);
-  this.save();
 };
 
 /** */
 State.prototype._setBoard = function (board) {
   this.current = board.name;
   this.board = board;
+  if (board.node === undefined) board.render();
   board.attach(this.boardNode);
   this._styleActiveListing();
+  this.save();
 };
 
 State.prototype._styleActiveListing = function () {
@@ -59,7 +60,7 @@ State.prototype._styleActiveListing = function () {
 
 /** */
 State.prototype.save = function () {
-  console.log('Saving settings and board info...');
+  console.log('Saving settings and board info.');
   localStorage.setItem('current', this.current);
   localStorage.setItem('boards', JSON.stringify(
     Array.from(this.boards.values())
@@ -99,7 +100,6 @@ State.prototype.addBoard = function (board) {
 State.prototype._attachListing = function (board) {
   board.renderListing();
   this.boardListNode.appendChild(board.listingNode);
-  board.addHandlersToListing();
 };
 
 State.prototype.renameBoard = function (board, newName) {
@@ -134,7 +134,7 @@ State.prototype.newBoard = function () {
   for (let i = 1; this.boards.has(newName); i++)
     newName = `${State.NEW_BOARD_NAME} (${i})`;
   const board = new Board({ name: newName });
-  board.saveTasks();
+  board.tasks = new Map();
   this.addBoard(board);
   this.save();
 };
