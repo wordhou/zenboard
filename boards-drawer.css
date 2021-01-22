@@ -1,34 +1,132 @@
-#nav-drawer {
-  float: left;
-  height: 100%;
-}
-
 #boards-drawer {
-  float: left;
-}
-#boards-drawer-expandible {
-  float: left;
-}
-#boards-drawer-handle {
-  float: right;
-  background-color: yellow;
-  height: 100%;
-}
-#boards-drawer-header {
-  clear: both;
-  overflow: auto;
-  background-color: burlywood;
+  width: 20em;
+  background-color: lightsalmon;
+
+  display: flex;
+  flex-flow: row nowrap;
 }
 
-#boards-drawer-header li {
-  float: left;
-  margin-left: 1em;
+#boards-drawer-expandible {
+  flex: 1;
+}
+
+#boards-drawer-handle {
+  flex: 0;
+  background-color: yellow;
+  width: 2em;
+
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#boards-drawer-handle svg,
+#boards-drawer-handle use {
+  height: 4em;
+  width: 1.5em;
+}
+
+#boards-drawer-header {
+  display: flex;
+  flex-flow: column;
+  background-color: royalblue;
+}
+
+#boards-drawer-header-actions {
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+}
+
+#boards-drawer-header-actions li {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+#boards-drawer-header-actions svg {
+  width: 30px;
+  height: 30px;
+}
+
+#boards-drawer-header-actions use {
+  width: 30px;
+  height: 30px;
 }
 
 .board-listing-component {
+  border: thin solid grey;
+  display: flex;
+  flex-flow: row nowrap;
 }
 
 .board-listing-component.on {
   font-weight: bold;
-  background-color: grey;
+  background-color: lightgray;
+}
+
+.listing-icon {
+  width: 40;
+  font-size: 3em;
+  flex: 0;
+}
+
+.listing-main {
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.listing-main .field {
+  overflow: hidden;
+  flex: 1;
+}
+
+.listing-main .button {
+  width: 1.5em;
+  flex: 0;
+}
+.listing-main svg,
+.listing-main use {
+  width: 1em;
+  height: 1em;
+}
+
+.listing-main .field-wrapper {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: baseline;
+}
+
+.board-listing-component textarea {
+  border: none;
+  overflow: auto;
+  outline: none;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  background: transparent;
+  resize: none;
+  min-height: 1em;
+  max-height: 4em;
+}
+
+.listing-name .field h1 {
+  font-size: 1.5em;
+  font-family: "Lucida Sans";
+}
+
+.listing-main .field h2 {
+  font-size: 1em;
+  font-family: "Lucida Sans";
+  color: darkslategrey;
+}
+
+.field .dyntext,
+.field .dyninput {
+  display: none;
+}
+
+.field .dyntext.on,
+.field .dyninput.on {
+  display: inline;
 }

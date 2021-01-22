@@ -1,0 +1,107 @@
+.todo {
+  position: absolute;
+  font-family: Helvetica;
+  box-sizing: border-box;
+  width: 200px;
+  height: auto;
+  padding: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: lightgoldenrodyellow;
+  border-radius: 5px;
+  overflow: auto;
+}
+
+.todo.on {
+  background-color: lightyellow;
+  box-shadow: 2px 6px 8px rgba(0, 0, 0, 0.4);
+}
+
+.todo:hover {
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+.todo:focus-within {
+  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.2);
+  background-color: yellow;
+}
+
+.todo textarea,
+.todo input {
+  border: none;
+  overflow: auto;
+  outline: none;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  background: transparent;
+  resize: none;
+}
+
+.todo textarea {
+  margin: 0;
+  width: 100%;
+  height: auto;
+  font-family: Helvetica;
+}
+.todo textarea:focus {
+}
+
+.todo .due {
+}
+
+.expand {
+  overflow: hidden;
+  height: 0;
+  transition: all 0.5s ease;
+}
+.expand.on {
+  height: 1.2em;
+}
+
+ul.icons {
+  width: 100%;
+  overflow: hidden;
+  list-style-type: none;
+}
+ul.icons li {
+  margin: 0 2px 0 2px;
+  float: left;
+}
+ul.icons li:last-child {
+  float: right;
+  clear: none;
+}
+
+ul.icons a svg {
+  width: 20px;
+  height: 20px;
+  fill: lightgray;
+}
+ul.icons svg symbol {
+  width: 20px;
+  height: 20px;
+}
+
+ul.icons .done.on svg {
+  fill: olivedrab;
+}
+ul.icons li:hover .done.on svg {
+  fill: darkseagreen;
+}
+ul.icons .flag.on svg {
+  fill: firebrick;
+}
+ul.icons li:hover .flag.on svg {
+  fill: indianred;
+}
+ul.icons .pin.on svg {
+  fill: deepskyblue;
+}
+ul.icons li:hover .pin.on svg {
+  fill: lightskyblue;
+}
+ul.icons li:hover svg {
+  fill: darkslategray;
+}
+ul.icons input {
+  font-family: Arial;
+}

@@ -1,9 +1,50 @@
+const $ = id => document.getElementById(id); // Alias for brevity
 const clamp = (a, b, c) => Math.max(a, Math.min(b, c));
-const MAX_TEXT_HEIGHT = 100;
-const DRAG_DELAY = 5;
 
-State.DEFAULT_BOARD_NAME = 'Default Board';
-State.NEW_BOARD_NAME = 'New Board';
+const autoResize = function (text) {
+  const resizeTextarea = () => {
+    text.style.height = 'auto';
+    text.style.height = clamp(0, text.scrollHeight, 500) + 'px';
+  };
+  text.addEventListener('change', resizeTextarea);
+  text.addEventListener('cut', () => setTimeout(resizeTextarea, 0));
+  text.addEventListener('paste', () => setTimeout(resizeTextarea, 0));
+  text.addEventListener('input', () => setTimeout(resizeTextarea, 0));
+  setTimeout(resizeTextarea, 0);
+};
+
+/**
+ * Returns a click handler used to make a text field editable.
+ * @param editTrigger - The element that triggers the edit. 
+ * @param dyntext - The text field that displays the dynamic content
+ * @param dyninput - The input field used to edit the content
+ * @param changeHandler - a callback that takes the new content
+ */
+const makeDynamicField = function (editTrigger, dyntext, dyninput, changeHandler) {
+  const updateAndSave = () => {
+    const good = changeHandler(dyninput.value);
+    if (good)
+      dyntext.innerText = dyninput.value;
+    else
+      dyninput.value = dyntext.innerText;
+    dyntext.classList.add('on');
+    dyninput.classList.remove('on');
+  };
+
+  const clickHandler = () => {
+    if (document.activeElement === dyninput)
+      return false; // Don't do anything if the board is already being edited
+    dyninput.value = dyntext.innerText;
+    dyntext.classList.remove('on');
+    dyninput.classList.add('on');
+
+    dyninput.focus();
+    setTimeout(() => dyninput.select(), 0);
+  };
+
+  dyninput.addEventListener('focusout', updateAndSave);
+  editTrigger.addEventListener('click', clickHandler);
+};
 
 /**
  * Manages the global state of the application as well as saving and
@@ -13,6 +54,9 @@ function State ({ boardListNode, boardNode }) {
   this.boardListNode = boardListNode;
   this.boardNode = boardNode;
 }
+
+State.DEFAULT_BOARD_NAME = 'Default Board';
+State.NEW_BOARD_NAME = 'New Board';
 
 /** Tries to load boards, current board and settings from localStorage */
 State.prototype.load = function() {
@@ -42,27 +86,26 @@ State.prototype._setupNew = function () {
   defaultBoard.saveTasks();
   this.addBoard(defaultBoard);
   this._setBoard(defaultBoard);
+  this.save();
 };
 
 /** */
 State.prototype._setBoard = function (board) {
-  console.log('set board', board);
   this.current = board.name;
   this.board = board;
   board.attach(this.boardNode);
   this._styleActiveListing();
-  this.save();
 };
 
 State.prototype._styleActiveListing = function () {
   for (let board of this.boards.values()) {
-    console.log(board, this.current===board.name);
     board.listingNode.classList.toggle('on', this.current === board.name);
   }
 };
 
 /** */
 State.prototype.save = function () {
+  console.log('Saving settings and board info...');
   localStorage.setItem('current', this.current);
   localStorage.setItem('boards', JSON.stringify(
     Array.from(this.boards.values())
@@ -74,14 +117,15 @@ State.prototype.save = function () {
   * Loads the board given its name, sets it to the current board, and attaches
   * it to the DOM */
 State.prototype.loadBoard = function (boardName) {
-  console.log('loading board', boardName);
+  console.log('Loading board', boardName);
   const obj = this.boards.get(boardName);
-  if (obj === null)
-    return Error(`No board found with name ${boardName}.`);
+  if (obj === undefined) {
+    console.log(`No board found with name ${boardName}.`);
+    return this._loadLastBoard();
+  }
 
-  const tasksStr = localStorage.getItem(`tasks-${boardName}`);
-  if (tasksStr === null)
-    return Error(`Couldn't get tasks for ${boardName} from localStorage.`);
+  const tasksStored = localStorage.getItem(`tasks-${boardName}`);
+  const tasksStr = tasksStored !== null ? tasksStored : '[]';
 
   obj.tasks = new Map(JSON.parse(tasksStr).map( props =>
     [props.created, new Task(props)]));
@@ -111,20 +155,27 @@ State.prototype._attachListing = function (board) {
 
 State.prototype.renameBoard = function (board, newName) {
   if (board.name === newName) {
-    return true;
-  } else if (this.boards.has(board.newName)) {
-    return false;
+    console.log('no rename happening');
+    return true; // Returns true when rename was successful
+  } else if (this.boards.has(newName)) {
+    console.log('you already have a board with that name');
+    return false; // Fails because two boards can't have the same name
   } else {
+    console.log('renameboard: you should be clear at this point. boards, newname: ', this.boards, newName);
+    // TODO add validity check to name
+    if (this.current === board.name) this.current = newName;
+    const oldName = board.name;
+    board.deleteTasks();
     board.name = newName;
-    // TODO this is all wrong
+    board.saveTasks();
+    this.boards.delete(oldName);
     this.boards.set(newName, board);
-    this.boards.delete(newName);
-    this.board.renderListing();
     this.save();
     return true;
   }
 };
 
+// Controller
 State.prototype.newBoard = function () {
   let newName = State.NEW_BOARD_NAME;
   for (let i = 1; this.boards.has(newName); i++)
@@ -135,38 +186,50 @@ State.prototype.newBoard = function () {
   this.save();
 };
 
+// Model
 State.prototype._deleteBoard = function (boardName) {
   console.log('deleting');
   const board = this.boards.get(boardName);
   board.deleteTasks();
   board.listingNode.remove();
   this.boards.delete(boardName); 
-  this.save();
 };
 
+// Controller
 State.prototype.deleteBoard = function () {
   const yes = confirm(`Are you sure you want to delete ${this.current}?`);
-  if (yes) {
-    this._deleteBoard(this.current);
-    //TODO load any (last) board. If no board exists, call _setupNew
-    const lastBoard = Array.from(this.boards.keys()).pop();
-    console.log(Array.from(this.boards.values()));
-    if (lastBoard === undefined) {
-      this._setupNew();
-    } else {
-      this.loadBoard(lastBoard);
-    }
+  if (yes) this._deleteBoard(this.current);
+  this._loadLastBoard();
+};
+
+/** Load a board (the last one added). If no board exists, call _setupNew */
+State.prototype._loadLastBoard = function () {
+  const lastBoard = Array.from(this.boards.keys()).pop();
+  if (lastBoard === undefined) {
+    this._setupNew();
+  } else {
+    this.loadBoard(lastBoard);
+    this.save();
   }
 };
 
 State.prototype._addHandlers = function () {
-  const $ = id => document.getElementById(id); // Alias for brevity
-
-  document.addEventListener('selectboard', event => {
+  document.addEventListener('boardselect', event => {
     this.loadBoard(event.detail);
   }, true);
 
-  $('newTask').addEventListener('click', () => {
+  document.addEventListener('renameboard', event => {
+    const success = this.renameBoard( event.detail.board, event.detail.newName );
+    console.log('Was rename successful?', success);
+    if (!success) event.preventDefault(); //TODO see if this works
+  }, { passive: false });
+
+  document.addEventListener('boardchange', () => this.save());
+
+  $('new-task').addEventListener('mousedown', () => {
+  });
+
+  $('new-task').addEventListener('click', () => {
     const task = this.board.addTask(new Task({x: 200, y: 200}));
 
     // TODO: On click, add task to random? board position;
@@ -182,7 +245,7 @@ State.prototype._addHandlers = function () {
 function Board({
   name = '',
   description = '',
-  template = 'default',
+  template = Template.default,
   width=1024,
   tasks
 }) {
@@ -204,7 +267,7 @@ Board.prototype.toJSON = function () {
 /** Renders this board and attaches it to the DOM node */
 Board.prototype.attach = function (target) {
   const element = document.createElement('div');
-  element.id = 'board';
+  element.classList.add('board');
   element.style.width = `${this.width}px`;
 
   this.node = element;
@@ -260,11 +323,6 @@ Board.prototype.makeTasksDraggable = function () {
   const grab = (t, event) => {
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.dropEffect = 'move';
-
-    /* TODO: This section doesn't appear to work. Its intended purpose is to 
-     * style the object just before it's dragged so that the browser caches a
-     * newly styled object as the Drag Image
-     */
     t.node.classList.toggle('on');
     setTimeout(() => t.node.classList.toggle('on'), 10);
 
@@ -273,8 +331,6 @@ Board.prototype.makeTasksDraggable = function () {
       y0 = t.y - event.y;
       task = t;
 
-      // Uses the drop event document to get final mouse coordinates as a
-      // workaround for a bug in Firefox
       document.addEventListener('drop', drop);
       document.addEventListener('dragover', dragoverHandler);
     }
@@ -299,9 +355,9 @@ Board.prototype.makeTasksDraggable = function () {
   this.node.addEventListener('dragstart', event => {
     // Check whether ancestor contains class
     let elem = event.target;
-    while (!elem.classList.contains('todo') && elem.id !== 'board') {
+    // TODO stop before elem == document
+    while (!elem.classList.contains('todo') && elem !== document)
       elem = elem.parentNode;
-    }
     if (elem.classList.contains('todo')) {
       const task = this.tasks.get(elem.dataset.created);
       grab (task, event);
@@ -316,48 +372,84 @@ Board.prototype.renderListing = function () {
   e.className = 'board-listing-component';
   e.dataset.name = this.name;
   e.innerHTML = `
-    <li>
-      <a class="select-board">
-      <div class="board-listing-icon">O</div>
-      <div class="board-listing-main">
-        <div class="board-listing-name">
-          <label>
-            <h1>${this.name}</h1>
-            <input value="${this.name}">
-          </label>
+      <div class="listing-icon">O</div>
+      <div class="listing-main">
+        <div class="listing-name field-wrapper">
+          <div class="field">
+            <h1 class="dyntext on">${this.name}</h1>
+            <input class="dyninput" value="${this.name}">
+            </input>
+          </div>
+          <a class="edit-name button">
+            <svg><use href="#edit" /></svg>
+          </a>
         </div>
-        <div class="board-listing-description">
-          <label>
-            <h2>${this.description}</h2>
-            <input value="${this.description}">
-          </label>
+        <div class="listing-description field-wrapper">
+          <div class="field">
+            <h2 class="dyntext on">${this.description}</h2>
+            <textarea placeholder="Description..." class="dyninput"
+              value="${this.description}"></textarea>
+          </div>
+          <a class="edit-description button">
+            <svg><use href="#edit"></svg>
+          </a>
         </div>
-      </div>
-      </a>
-    </li>`;
+      </div>`;
   this.listingNode = e;
   // References to DOM components of the listing element
   this.listingNodes = {
-    select : e.querySelector('.select-board'),
-    name : e.querySelector('.board-listing-name'),
-    nameText : e.querySelector('.board-listing-name h1'),
-    nameInput : e.querySelector('.board-listing-name input'),
-    description : e.querySelector('.board-listing-description'),
-    descriptionText : e.querySelector('.board-listing-description h1'),
-    descriptionInput : e.querySelector('.board-listing-description input')
+    name : e.querySelector('.listing-name'),
+    nameText : e.querySelector('.listing-name .dyntext'),
+    nameInput : e.querySelector('.listing-name .dyninput'),
+    description : e.querySelector('.listing-description'),
+    descriptionText : e.querySelector('.listing-description .dyntext'),
+    descriptionInput : e.querySelector('.listing-description .dyninput'),
+    editName: e.querySelector('.edit-name'),
+    editDescription: e.querySelector('.edit-description')
   };
 };
 
 Board.prototype.addHandlersToListing = function () {
-  this.listingNodes.select.addEventListener('click', () => {
-    const e = new CustomEvent('selectboard', { detail: this.name, bubbles: true });
+  autoResize(this.listingNodes.descriptionInput);
+  this.listingNode.addEventListener('click', event => {
+    // Check whether ancestor contains class
+    let elem = event.target;
+    while (elem !== document) {
+      if (elem.classList.contains('button'))
+        return false;
+      elem = elem.parentNode;
+    }
+    const e = new CustomEvent('boardselect', { detail: this.name, bubbles: true });
     this.listingNode.dispatchEvent(e);
   });
+
+  makeDynamicField(
+    this.listingNodes.editName,
+    this.listingNodes.nameText,
+    this.listingNodes.nameInput,
+    value => this._dispatchRenameBoardEvent(value)
+  );
+  makeDynamicField(
+    this.listingNodes.editDescription,
+    this.listingNodes.descriptionText,
+    this.listingNodes.descriptionInput,
+    value => {
+      this.description = value;
+      this.markChanged();
+      return true;
+    }
+  );
 };
 
-/** Action that makes the listing name editable and focuses on it */
-Board.prototype.editName = function () {
-  // Replace h1 with an input
+Board.prototype._dispatchRenameBoardEvent = function (newName) {
+  const ev = new CustomEvent('renameboard', { detail : { board: this, newName },
+    bubbles: true,
+    cancelable: true
+  });
+
+  const d = this.listingNode.dispatchEvent(ev);
+  console.log('return from dispatchevent:', d);
+  return d;
 };
 
 /** The board's tasks are saved to localStorage in an array of values */
@@ -374,9 +466,8 @@ Board.prototype.resize = function (width) {
 
 Board.prototype.markChanged = function () {
   const e = new CustomEvent('boardchange', { bubbles: true });
-  this.node.dispatchEvent(e);
+  this.listingNode.dispatchEvent(e);
 };
-
 
 
 /**
@@ -452,15 +543,7 @@ Task.prototype.render = function () {
 };
 
 Task.prototype.addHandlers = function() {
-  const resizeTextarea = () => {
-    this.nodes.text.style.height = 'auto';
-    this.nodes.text.style.height = clamp(0, this.nodes.text.scrollHeight, MAX_TEXT_HEIGHT) + 'px';
-  };
-  this.nodes.text.addEventListener('change', resizeTextarea);
-  this.nodes.text.addEventListener('cut', () => setTimeout(resizeTextarea, 0));
-  this.nodes.text.addEventListener('paste', () => setTimeout(resizeTextarea, 0));
-  this.nodes.text.addEventListener('input', () => setTimeout(resizeTextarea, 0));
-  setTimeout(resizeTextarea, 0);
+  autoResize(this.nodes.text);
 
   this.nodes.text.addEventListener('change', () => {
     this.text = this.nodes.text.value;
@@ -472,7 +555,6 @@ Task.prototype.addHandlers = function() {
     this.markChanged();
   });
 
-  //TODO see if I can refactor this to be less repetitive
   this.nodes.expander.addEventListener('click', () => {
     this.toggle('expand');
     this.markChanged();
@@ -517,11 +599,28 @@ Task.prototype.delete = function () {
   this.node.remove();
 };
 
+function Template () {
+}
+
+Template.default = '{}';
+
+
 var state; // DEBUG
 window.addEventListener('load', () => {
+  (() => {
+    const expandible = $('boards-drawer');
+    const handle = $('boards-drawer-handle');
+
+    handle.addEventListener('click', () => {
+      console.log('hi');
+      expandible.classList.toggle('expanded');
+      handle.classList.toggle('expanded');
+    });
+  })();
   state = new State({
     boardNode: document.getElementById('board-wrapper'),
     boardListNode: document.getElementById('board-list')
   });
   state.load();
+
 });

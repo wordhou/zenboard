@@ -1,184 +1,63 @@
+.indicator .open,
+.indicator.expanded .close {
+  display: none;
+}
+
+.indicator.expanded .open,
+.indicator .close {
+  display: block;
+}
+
+.expandible.expanded {
+  margin-left: 0;
+}
+
+.expandible {
+  margin-left: -18em;
+  transition: all 0.5s ease;
+}
+
+#layout {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
 #header {
-  width: 100%;
   background-color: magenta;
-  clear: both;
-}
-#header ul.nav-bar {
-  overflow: auto;
 }
 
-#header ul.nav-bar li {
-  float: left;
-  margin-left: 1em;
-}
 #footer {
-  clear: both;
   background-color: magenta;
   width: 100%;
 }
 
-#main {
-  overflow: auto;
+#content {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: left;
+  align-items: stretch;
 }
 
 #nav-drawer {
-  float: left;
-  height: 100%;
 }
 
-#boards-drawer {
-  float: left;
-}
-#boards-drawer-expandible {
-  float: left;
-}
-#boards-drawer-handle {
-  float: right;
-  background-color: yellow;
-  height: 100%;
-}
-#boards-drawer-header {
-  clear: both;
-  overflow: auto;
-  background-color: burlywood;
+#board-wrapper {
 }
 
-#boards-drawer-header li {
-  float: left;
-  margin-left: 1em;
-}
-
-.board-listing-component {
-}
-
-.board-listing-component.on {
-  font-weight: bold;
-  background-color: grey;
-}
-
-#board {
-  float: left;
+.board {
   position: relative;
   height: 800px;
   background-color: lightgray;
 }
 
-.todo {
-  position: absolute;
-  font-family: Helvetica;
-  box-sizing: border-box;
-  width: 200px;
-  height: auto;
-  padding: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  background-color: lightgoldenrodyellow;
-  border-radius: 5px;
-  overflow: auto;
+#new-task svg,
+#new-task use {
+  height: 40px;
+  width: 40px;
 }
 
-.todo.on {
-  background-color: lightyellow;
-  box-shadow: 2px 6px 8px rgba(0, 0, 0, 0.4);
-}
-
-.todo:hover {
-  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
-}
-
-.todo:focus-within {
-  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.2);
-  background-color: yellow;
-}
-
-.todo-left {
-  float: left;
-  width: auto;
-}
-
-.todo-right {
-  float: right;
-  width: 10px;
-  height: 100%;
-  background-color: fuchsia;
-}
-
-.todo textarea,
-.todo input {
-  border: none;
-  overflow: auto;
-  outline: none;
-  box-shadow: none;
-  -moz-box-shadow: none;
-  background: transparent;
-  resize: none;
-}
-
-.todo textarea {
-  margin: 0;
-  width: 100%;
-  height: auto;
-  font-family: Helvetica;
-}
-.todo textarea:focus {
-}
-
-.todo .due {
-}
-
-.expand {
-  overflow: hidden;
-  height: 0;
-  transition: all 0.5s ease;
-}
-.expand.on {
-  height: 1.2em;
-}
-
-ul.icons {
-  width: 100%;
-  overflow: hidden;
-  list-style-type: none;
-}
-ul.icons li {
-  margin: 0 2px 0 2px;
-  float: left;
-}
-ul.icons li:last-child {
-  float: right;
-  clear: none;
-}
-
-ul.icons a svg {
-  width: 20px;
-  height: 20px;
-  fill: lightgray;
-}
-ul.icons svg symbol {
-  width: 20px;
-  height: 20px;
-}
-
-ul.icons .done.on svg {
-  fill: olivedrab;
-}
-ul.icons li:hover .done.on svg {
-  fill: darkseagreen;
-}
-ul.icons .flag.on svg {
-  fill: firebrick;
-}
-ul.icons li:hover .flag.on svg {
-  fill: indianred;
-}
-ul.icons .pin.on svg {
-  fill: deepskyblue;
-}
-ul.icons li:hover .pin.on svg {
-  fill: lightskyblue;
-}
-ul.icons li:hover svg {
-  fill: darkslategray;
-}
-ul.icons input {
-  font-family: Arial;
+#new-task {
+  position: relative;
+  left: 20px;
+  top: 20px;
 }
