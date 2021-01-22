@@ -7,6 +7,11 @@
   <link rel="stylesheet" href="boards-drawer.css"></link>
   <link rel="stylesheet" href="style.css"></link>
   <link rel="stylesheet" href="task.css"></link>
+  <script src="utils.js"></script>
+  <script src="state.js"></script>
+  <script src="board.js"></script>
+  <script src="task.js"></script>
+  <script src="todo.js"></script>
 </head>
 <body>
   <div id="layout">
@@ -46,11 +51,13 @@
       </div>
     </div>
 
-<div id="board-wrapper">
+    <div id="content-right">
         <a id="new-task" class="button">
             <svg><use href="#plus-circle-fill" /></svg>
-          </a>
+         </a>
+<div id="board-wrapper">
 </div>
+    </div>
 
 </div>
 
@@ -102,5 +109,4 @@
 </svg>
 
 </body>
-  <script src="todo.js"></script>
 </html>

@@ -38,7 +38,8 @@
   align-items: stretch;
 }
 
-#nav-drawer {
+#content-right {
+  position: relative;
 }
 
 #board-wrapper {
@@ -57,7 +58,8 @@
 }
 
 #new-task {
-  position: relative;
+  z-index: 10;
+  position: absolute;
   left: 20px;
   top: 20px;
 }
