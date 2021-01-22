@@ -67,6 +67,11 @@ Task.prototype.render = function () {
     pin : e.querySelector('.pin'),
     trash : e.querySelector('.trash'),
   };
+
+  // Set styles
+  e.style.left = `${this.x}px`;
+  e.style.top = `${this.y}px`;
+
   this.node = e;
 };
 

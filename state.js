@@ -53,6 +53,7 @@ State.prototype._setBoard = function (board) {
 State.prototype._styleActiveListing = function () {
   for (let board of this.boards.values()) {
     board.listingNode.classList.toggle('on', this.current === board.name);
+    // TODO This doesn't seem right
   }
 };
 
@@ -128,7 +129,6 @@ State.prototype.renameBoard = function (board, newName) {
   return true;
 };
 
-// Controller
 State.prototype.newBoard = function () {
   let newName = State.NEW_BOARD_NAME;
   for (let i = 1; this.boards.has(newName); i++)
@@ -139,7 +139,6 @@ State.prototype.newBoard = function () {
   this.save();
 };
 
-// Model
 State.prototype._deleteBoard = function (boardName) {
   console.log('deleting');
   const board = this.boards.get(boardName);
@@ -148,7 +147,6 @@ State.prototype._deleteBoard = function (boardName) {
   this.boards.delete(boardName); 
 };
 
-// Controller
 State.prototype.deleteBoard = function () {
   const yes = confirm(`Are you sure you want to delete ${this.current}?`);
   if (yes) this._deleteBoard(this.current);

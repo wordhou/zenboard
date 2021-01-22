@@ -21,6 +21,21 @@ Board.prototype.toJSON = function () {
   return obj;
 };
 
+/** Creates a new task, adds it to the boards map, and attaches it to the doc */
+Board.prototype.addTask = function (task) {
+  this.tasks.set(task.created, task);
+  this.saveTasks();
+  this.attachTask(task);
+};
+
+/** Adds a task to the board DOM and the board.tasks map */
+Board.prototype.attachTask = function (task) {
+  if (task.node === undefined) task.render();
+  this.node.appendChild(task.node);
+  task.addHandlers();
+  return task;
+};
+
 /** Renders this board and attaches it to the DOM node */
 Board.prototype.attach = function (target) {
   const element = document.createElement('div');
@@ -34,7 +49,7 @@ Board.prototype.attach = function (target) {
   target.appendChild(element);
 
   for (let task of this.tasks.values()) {
-    this.addTask(task);
+    this.attachTask(task);
   }
 
   this.addHandlers();
@@ -50,19 +65,6 @@ Board.prototype.loadTasks = function () {
 
   this.tasks = new Map(JSON.parse(tasksStr).map( props =>
     [props.created, new Task(props)]));
-};
-
-//TODO The tasks map should be populated in a separate method
-/** Adds a new task to the board DOM and the board.tasks map */
-Board.prototype.addTask = function (task) {
-  this.tasks.set(task.created, task);
-  task.render();
-  this.node.appendChild(task.node); // TODO ??
-  task.node.style.left = `${task.x}px`;
-  task.node.style.top = `${task.y}px`;
-  task.addHandlers();
-  this.saveTasks();
-  return task;
 };
 
 Board.prototype.deleteTask = function (task) {
