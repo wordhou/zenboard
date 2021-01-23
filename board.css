@@ -13,6 +13,11 @@
 .board .category {
 }
 
+.category {
+  border-radius: 5px;
+  background-color: darkgray;
+}
+
 .board.list-view .category {
   display: flex;
   flex-flow: column nowrap;

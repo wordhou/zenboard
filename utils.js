@@ -1,6 +1,14 @@
 const $ = id => document.getElementById(id); // Alias for brevity
 const clamp = (a, b, c) => Math.max(a, Math.min(b, c));
 
+const mex = function (arr, min = 1) {
+  var n = min;
+  while (arr.includes(n)) n++;
+  return n;
+};
+
+const dist = (p1, p2) => Math.sqrt((p1.x - p2.x)^2 + (p1.y - p2.y)^2);
+
 const autoResize = function (text) {
   const resizeTextarea = () => {
     text.style.height = 'auto';
@@ -47,5 +55,3 @@ const makeDynamicField = function (editTrigger, dyntext, dyninput, changeHandler
   editTrigger.addEventListener('click', edit);
   return edit;
 };
-
-

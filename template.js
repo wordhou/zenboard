@@ -32,3 +32,11 @@ Template.loadTemplates = function (json) {
 Template.loadTemplates (`
 `);
 */
+
+Template.getCatFromClassList = function (elem) {
+  for (let s of elem.classList.values()) {
+    if (s.substr(0,4) === 'cat-') {
+      return s.substr(4);
+    }
+  }
+};

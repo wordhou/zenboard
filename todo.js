@@ -7,7 +7,6 @@ window.addEventListener('load', () => {
     const handle = $('boards-drawer-handle');
 
     handle.addEventListener('click', () => {
-      console.log('hi');
       expandible.classList.toggle('expanded');
       handle.classList.toggle('expanded');
     });

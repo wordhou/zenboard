@@ -35,7 +35,7 @@ State.prototype._setupNew = function () {
   const def = State.DEFAULT_BOARD_NAME;
   this.boards = new Map();
   
-  const defaultBoard = new Board({name: def, width: 1024, height: 768});
+  const defaultBoard = new Board({name: def, width: 1024});
   defaultBoard.saveTasks(); // TODO necessary?
   this.addBoard(defaultBoard);
   this._setBoard(defaultBoard);
@@ -52,8 +52,8 @@ State.prototype._setBoard = function (board) {
   this.save();
 };
 
-State.prototype.changeTemplate = function (board, template) {
-  board.template = template;
+State.prototype.changeTemplate = function (board, templateName) {
+  board.templateName = templateName;
   if (this.board === board) {
     board.render();
     board.attach(this.boardNode);

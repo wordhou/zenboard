@@ -11,7 +11,7 @@ function Task (
     , flag = false
     , expand = false
     , x, y, z
-    , category, i
+    , category, order
     , created}) {
   this.text = text;
   this.due = due;
@@ -23,7 +23,7 @@ function Task (
   this.y = y;
   this.z = z;
   this.category = category;
-  this.order = i;
+  this.order = order;
   this.created = created === undefined ? (new Date()).toJSON() : created;
   this.render();
   this.node.style.left = `${this.x}px`;
@@ -32,7 +32,9 @@ function Task (
 
 // List of property names that are stored in localStorage
 Task.storableProperties = ['text', 'due', 'done', 'pin', 'flag', 'expand',
-  'x', 'y', 'z', 'category', 'i', 'created'];
+  'x', 'y', 'z', 'category', 'order', 'created'];
+
+Task.MAX_WIDTH = 300;
 
 Task.prototype.toJSON = function () {
   const obj = {};
@@ -45,7 +47,7 @@ Task.prototype.toJSON = function () {
 /** Populates the .node property with a generated HTML element */
 Task.prototype.render = function () {
   const e = document.createElement('div');
-  e.className = 'todo';
+  e.className = 'todo task-drop-target';
   e.setAttribute('draggable', !this.pin);
   e.dataset.created = this.created;
   e.innerHTML = `<textarea placeholder="Todo...">${this.text}</textarea>
