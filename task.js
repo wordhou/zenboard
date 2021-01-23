@@ -10,7 +10,7 @@ function Task (
     , pin = false
     , flag = false
     , expand = false
-    , x, y, z = 0
+    , x, y, z
     , category, i
     , created}) {
   this.text = text;
@@ -22,8 +22,8 @@ function Task (
   this.x = x;
   this.y = y;
   this.z = z;
-  this.order = i;
   this.category = category;
+  this.order = i;
   this.created = created === undefined ? (new Date()).toJSON() : created;
   this.render();
   this.node.style.left = `${this.x}px`;
@@ -72,10 +72,9 @@ Task.prototype.render = function () {
     pin : e.querySelector('.pin'),
     trash : e.querySelector('.trash'),
   };
+  this.node = e;
 
   this.setStyles();
-
-  this.node = e;
   this.addHandlers();
 };
 

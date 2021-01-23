@@ -5,15 +5,17 @@ function Board({
   name = '',
   description = '',
   template = Template.default,
+  list = false,
   width=1024
 }) {
   this.name = name;
   this.description = description;
   this.template = template;
   this.width = width;
+  this.list = list;
 }
 
-Board.storableProperties = ['name', 'description', 'template', 'width'];
+Board.storableProperties = ['name', 'description', 'template', 'width', 'list'];
 
 Board.prototype.toJSON = function () {
   const obj = {};
@@ -24,7 +26,7 @@ Board.prototype.toJSON = function () {
 // Updates the state and the DOM
 Board.prototype.newTask = function (props = {}) {
   const task = new Task(props);
-  this.tasks.set(task);
+  this.tasks.set(task.created, task);
 
   if (task.x === undefined) {
     // TODO generate x,y values
@@ -32,7 +34,11 @@ Board.prototype.newTask = function (props = {}) {
     task.y = 200;
   }
   if (task.category === undefined)
-  return this.addTask(task);
+
+  this.moveTaskToTop(task);
+  this.addTask(task);
+
+  return task;
 }
 
 
@@ -56,13 +62,13 @@ Board.prototype.removeTaskFromCategory = function (task) {
  */
 Board.prototype.addTask = function (task, cat, pos) {
   // TODO Check if cat is reasonable and throw error otherwise
-  const temp = Template.templates.get(this.templates);
+  const temp = Template.templates.get(this.template);
   task.category = cat === undefined ? temp.def : cat;
 
  /*Sets the category orders to allow another task to be insterted at a position.
   * If position is not given, it calculates the minimum unused index in the
   * category and also returns the value. */
-  const taskNodes = Array.from(this.categoryNodes[cat].children);
+  const taskNodes = Array.from(this.categoryNodes[task.category].children);
   const tasks = taskNodes.map(node => this.tasks.get(node.dataset.created));
   if (pos === undefined) {
     const orders = tasks.map(task => task.order);
@@ -70,7 +76,6 @@ Board.prototype.addTask = function (task, cat, pos) {
     while (orders.includes(pos))
       pos++
     task.order = pos;
-    task.setStyles();
   } else {
     tasks.forEach(t => { if (t.order >= pos) {
         t.order++;
@@ -78,8 +83,9 @@ Board.prototype.addTask = function (task, cat, pos) {
       } });
   }
 
-  this.saveTasks();
-  task.attach(this.categoryNodes[cat]);
+  task.setStyles();
+  task.attach(this.categoryNodes[task.category]);
+  return task;
 }
 
 Board.prototype.setCategoryOrders = function(cat, pos) {
@@ -105,22 +111,21 @@ Board.prototype.moveTaskToCategory = function (task, cat, pos) {
 }
 
 Board.prototype.render = function () {
-  console.log(Template.default);
   const element = document.createElement('div');
   element.classList.add('board');
   element.style.width = `${this.width}px`;
+  if (this.list) element.classList.add('list-view');
   this.node = element;
 
   const temp = Template.templates.get(this.template);
 
   this.categoryNodes = {};
-
-  for (let cat in temp.categories) { // TODO maybe move to method
+  temp.categories.forEach ( cat => {
     const catElement = document.createElement('div');
     catElement.className = `category cat-${cat}`;
     this.categoryNodes[cat] = catElement;
     this.node.appendChild(catElement);
-  }
+  });
 
   // Add the tasks
   this.tasks.forEach(task => this.addTask(task));
@@ -134,14 +139,6 @@ Board.prototype.attach = function (target) {
   // Replaces the element `<div id="board">` with our new element
   target.innerHTML = '';
   target.appendChild(this.node);
-};
-
-/** Creates a new task, adds it to the boards map, and attaches it to the doc */
-Board.prototype.addTask = function (task) {
-  this.tasks.set(task.created, task);
-  this.saveTasks();
-  this.attachTask(task); // TODO MAKE SURE THIS WORKS WITH NEW CATEGORY LOGIC
-  return task;
 };
 
 Board.prototype.addHandlers = function () {
@@ -160,11 +157,10 @@ Board.prototype.makeTasksDraggable = function () {
   // needs to be kept.
   var x0, y0, task;
 
+
   const grab = (t, event) => {
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.dropEffect = 'move';
-    t.node.classList.toggle('on');
-    setTimeout(() => t.node.classList.toggle('on'), 10);
 
     if (!t.pin) {
       x0 = t.x - event.x;
@@ -185,8 +181,8 @@ Board.prototype.makeTasksDraggable = function () {
     event.preventDefault();
     task.x = clamp (0, x0 + event.x, this.width - task.node.offsetWidth);
     task.y = clamp (0, y0 + event.y, 100000);
-    task.node.style.left = task.x + 'px';
-    task.node.style.top = task.y + 'px';
+    this.moveTaskToTop(task);
+    task.setStyles();
     document.removeEventListener('drop', drop);
     document.removeEventListener('dragover', dragoverHandler);
     this.saveTasks();
@@ -216,6 +212,21 @@ Board.prototype.loadTasks = function () {
 
   return this.tasks = new Map(JSON.parse(tasksStr).map( props =>
     [props.created, new Task(props)]));
+};
+
+Board.prototype.moveTaskToTop = function (task) {
+  console.log('moveTaskToTop', task, task.z);
+  const tasks = Array.from(this.tasks.values());
+  const zs = tasks.map(t => t === task ? null : t.z);
+  console.log('zs', zs);
+
+  let mex = Board.BASE_Z_INDEX;
+  while (zs.includes(mex)) mex++;
+  console.log('mex', mex);
+
+  // Move every node above its prev pos down by 1
+  this.tasks.forEach(t => { if (t.z > task.z) t.z--; t.setStyles(); });
+  return task.z = mex;
 };
 
 Board.prototype.deleteTask = function (task) {
@@ -314,14 +325,15 @@ Board.prototype._dispatchRenameBoardEvent = function (newName) {
   });
 
   const d = this.listingNode.dispatchEvent(ev);
-  console.log('return from dispatchevent:', d);
   return d;
 };
 
 /** The board's tasks are saved to localStorage in an array of values */
 Board.prototype.saveTasks = function () {
-
-  const taskString = JSON.stringify(Array.from(this.tasks.values()));
+  if (this.tasks === undefined) return;
+  const taskJSON = Array.from(this.tasks.values());
+  const taskString = JSON.stringify(taskJSON);
+  console.log('Saving tasks:', taskJSON);
   localStorage.setItem(`tasks-${this.name}`, taskString);
 };
 
@@ -335,3 +347,5 @@ Board.prototype.markChanged = function () {
   const e = new CustomEvent('boardchange', { bubbles: true });
   this.listingNode.dispatchEvent(e);
 };
+
+Board.BASE_Z_INDEX = 5;

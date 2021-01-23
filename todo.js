@@ -12,6 +12,7 @@ window.addEventListener('load', () => {
       handle.classList.toggle('expanded');
     });
   })();
+
   state = new State({
     boardNode: document.getElementById('board-wrapper'),
     boardListNode: document.getElementById('board-list')

@@ -11,17 +11,17 @@ Template.default = 'Default';
 
 Template.templates = new Map (
 [
-  [ "Default",  {
+  {
     "name": "Default",
     "categories": ["Todo"],
-    "def": "todo"
-  }],
-  [ "Trifold",  {
+    "def": "Todo"
+  },
+  {
     "name": "Trifold",
     "categories": ["Todo", "In Progress", "Completed"],
-    "def": "todo"
-  }],
-]
+    "def": "Todo"
+  },
+].map( t => [t.name, new Template(t)])
 );
 
 /*

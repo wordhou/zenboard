@@ -2,4 +2,29 @@
   position: relative;
   height: 800px;
   background-color: lightgray;
+  display: flex;
+  flex-flow: row;
+  /* z-index: -10; */
+}
+
+.board.list-view {
+}
+
+.board .category {
+}
+
+.board.list-view .category {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.board.list-view .todo {
+  display: inline;
+  position: static;
+}
+
+.todo {
+  position: absolute;
+  box-sizing: border-box;
+  width: 17em;
 }

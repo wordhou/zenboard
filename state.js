@@ -36,7 +36,7 @@ State.prototype._setupNew = function () {
   this.boards = new Map();
   
   const defaultBoard = new Board({name: def, width: 1024, height: 768});
-  defaultBoard.saveTasks();
+  defaultBoard.saveTasks(); // TODO necessary?
   this.addBoard(defaultBoard);
   this._setBoard(defaultBoard);
 };
@@ -45,6 +45,7 @@ State.prototype._setupNew = function () {
 State.prototype._setBoard = function (board) {
   this.current = board.name;
   this.board = board;
+  if (board.tasks === undefined) board.loadTasks();
   if (board.node === undefined) board.render();
   board.attach(this.boardNode);
   this._styleActiveListing();
@@ -196,4 +197,16 @@ State.prototype._addHandlers = function () {
 
   $('new-board').addEventListener('click', () => this.newBoard());
   $('delete-board').addEventListener('click', () => this.deleteBoard());
+  const toggleViewButton = $('toggle-view');
+  $('toggle-view').addEventListener('click', () => {
+    toggleViewButton.classList.toggle('on');
+    this.toggleView();
+  });
+};
+
+State.prototype.toggleView = function () {
+  this.board.list = !this.board.list;
+  this.save();
+
+  this.board.node.classList.toggle('list-view');
 };

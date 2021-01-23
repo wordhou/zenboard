@@ -43,27 +43,29 @@ body {
 }
 
 #content-right {
-  position: relative;
+  display: flex;
+  flex-flow: row;
 }
 
 #board-wrapper {
-}
-
-.board {
   position: relative;
-  height: 800px;
-  background-color: lightgray;
 }
 
-#new-task svg,
-#new-task use {
-  height: 40px;
-  width: 40px;
+#board-controls {
+  display: flex;
+  flex-flow: column;
 }
 
-#new-task {
-  z-index: 10;
-  position: absolute;
-  left: 20px;
-  top: 20px;
+#board-controls .button {
+  margin-bottom: 1em;
+}
+
+#board-controls .button svg,
+#board-controls .button use {
+  height: 3em;
+  width: 3em;
+}
+
+#toggle-view.on {
+  fill: lightsteelblue;
 }

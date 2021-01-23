@@ -1,20 +1,12 @@
 .todo {
-  position: absolute;
   font-family: Helvetica;
   font-size: inherit;
-  box-sizing: border-box;
-  width: 17em;
   height: auto;
-  padding: 0.2em;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   background-color: lightgoldenrodyellow;
   border-radius: 5px;
   overflow: auto;
-}
-
-.todo.on {
-  background-color: lightyellow;
-  box-shadow: 2px 6px 8px rgba(0, 0, 0, 0.4);
+  padding: 0.3em;
 }
 
 .todo:hover {
@@ -70,7 +62,6 @@ ul.icons li {
 }
 ul.icons li:last-child {
   float: right;
-  clear: none;
 }
 
 ul.icons a svg {
