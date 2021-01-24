@@ -53,7 +53,9 @@ State.prototype._setupNew = function () {
 State.prototype._setBoard = function (board) {
   this.current = board.name;
   this.board = board;
-  if (board.tasks === undefined) board.loadTasks(); //
+  if (board.tasks === undefined) board.loadTasks();
+  if (!board.list) this.nodes.toggleView.classList.remove('on');
+  if (board.list) this.nodes.toggleView.classList.add('on');
   board.attach(this.nodes.board, this.nodes.spinner);
   this._styleActiveListing();
   this.save();
