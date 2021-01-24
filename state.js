@@ -45,8 +45,7 @@ State.prototype._setupNew = function () {
 State.prototype._setBoard = function (board) {
   this.current = board.name;
   this.board = board;
-  if (board.tasks === undefined) board.loadTasks();
-  if (board.node === undefined) board.render();
+  if (board.tasks === undefined) board.loadTasks(); //
   board.attach(this.boardNode);
   this._styleActiveListing();
   this.save();
@@ -98,13 +97,10 @@ State.prototype.loadBoard = function (boardName) {
  * adds the listingNode to the boardListNode
  */
 State.prototype.addBoard = function (board) {
-  if (this.boards.has(board.name)) {
-    return false;
-  } else {
-    this.boards.set(board.name, board);
-    this._attachListing(board);
-    return true;
-  }
+  if (this.boards.has(board.name)) return false;
+  this.boards.set(board.name, board);
+  this._attachListing(board);
+  return true;
 };
 
 State.prototype._attachListing = function (board) {
@@ -188,7 +184,16 @@ State.prototype._addHandlers = function () {
 
   document.addEventListener('boardchange', () => this.save());
 
-  $('new-task').addEventListener('click', () => this.board.newTask());
+  $('new-task').addEventListener('click', () => {
+    const task = this.board.newTask();
+    this.board.putTask(task);
+    task.node.focus();
+    this.board.saveTasks();
+  });
+
+  $('new-task').addEventListener('dragstart', event => {
+    this.board.dragNewTaskHandler(event);
+  });
 
   $('new-board').addEventListener('click', () => this.newBoard());
   $('delete-board').addEventListener('click', () => this.deleteBoard());

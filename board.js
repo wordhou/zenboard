@@ -1,4 +1,4 @@
-/* global dist, clamp, autoResize, makeDynamicField, Template, Task, mex */
+/* global $, dist, clamp, autoResize, makeDynamicField, Template, Task, mex */
 
 /** Stores the state of a board. @constructor */
 function Board({
@@ -28,17 +28,16 @@ Board.prototype.toJSON = function () {
 // Updates the state and the DOM
 Board.prototype.newTask = function (props = {}) {
   const task = new Task(props);
+
   if (task.x === undefined) {
     const pos = this.newTaskPosition();
     task.x = pos.x;
     task.y = pos.y;
   }
 
+  console.log('Adding new task to state.board.tasks map with key', task.created);
   this.tasks.set(task.created, task);
   this.moveTaskToTop(task);
-  this.putTask(task);
-
-  task.nodes.text.focus();
   return task;
 }
 
@@ -159,21 +158,26 @@ Board.prototype.attach = function (target) {
   // Replaces the element `<div id="board">` with our new element
   target.innerHTML = '';
   target.appendChild(this.node);
-  target.parentNode.appendChild(this.dummyTask);
+  target.appendChild(this.dummyTask);
 };
 
 Board.prototype.addHandlers = function () {
   this.node.addEventListener('taskchange', () => this.saveTasks());
   this.node.addEventListener('taskdelete', e => this.deleteTask(e.detail));
-
   this.makeTasksDraggable();
-  // TODO: Drag to resize feature. Attach event listener to element and
-  // implement grab, drag, and drop functions.
 };
+
+// TODO remove
+Board.prototype.removeHandlers = function () {
+  if (this.handlers === undefined) return;
+  $('new-task').removeEventListener('dragstart', this.handlers.dragNewTaskHandler);
+  document.removeEventListener('drop', this.handlers.dropHandler);
+}
 
 /** Attaches all event listeners to the DOM element for a task */
 Board.prototype.makeTasksDraggable = function () {
-  document.getElementById('new-task').addEventListener('dragstart', event => {
+  this.dragNewTaskHandler = event => {
+    console.log('dragNewTaskHandler');
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setDragImage(this.dummyTask, 0, 0);
 
@@ -181,17 +185,15 @@ Board.prototype.makeTasksDraggable = function () {
     const data = {
       task: null,
       dx: -rect.x,
-      dy:-rect.y 
+      dy: -rect.y 
     };
     event.dataTransfer.setData('text/plain', JSON.stringify(data));
+  };
 
-  });
-
-  this.node.addEventListener('dragstart', event => {
+  const dragstartHandler = event => {
     event.stopPropagation();
     // Check whether ancestor contains class
     let elem = event.target;
-    // TODO stop before elem == document
     while (!elem.classList.contains('todo') && elem !== document)
       elem = elem.parentNode;
     if (!elem.classList.contains('todo')) return false;
@@ -211,24 +213,17 @@ Board.prototype.makeTasksDraggable = function () {
     event.dataTransfer.setData('text/plain', JSON.stringify(data));
 
     return false;
-  });
+  };
 
-  this.node.addEventListener('dragover', event => {
+  const dragoverHandler = event => {
     event.preventDefault();
     if (!this.list) return false;
     if (event.target.classList.contains('task-drop-target')) {
       event.target.classList.add('drop-hover');
     }
-  });
+  };
 
-  this.node.addEventListener('dragleave', event => {
-    if (!this.list) return false;
-    if (event.target.classList.contains('task-drop-target')) {
-      event.target.classList.remove('drop-hover');
-    }
-  });
-
-  document.addEventListener('drop', event => {
+  const dropHandler = event => {
     event.preventDefault();
     const data = JSON.parse(event.dataTransfer.getData('text/plain'));
     let task;
@@ -236,20 +231,15 @@ Board.prototype.makeTasksDraggable = function () {
     event.target.classList.remove('drop-hover');
 
     if (this.list) {
+      console.log('Dragging new task into list mode.');
       var elem = event.target;
       while (!elem.classList.contains('task-drop-target')) {
         if (elem == document.body) return false;
         elem = elem.parentElement;
       }
-      if (elem === task) return false;
-      // At this point we know we are making a new task
-      // TODO This new task logic needs to be ~ this.newTask()
-        if (data.task === null) {
-          task = new Task({});
-          this.tasks.set(task.created, task) 
-        } else {
-          task = this.tasks.get(data.task);
-        }
+      if (elem === task) return false; // Dragging task to itself
+      task = data.task === null 
+        ? this.newTask() : this.tasks.get(data.task);
 
       if (elem.classList.contains('task-container')) {
         this.moveTaskToCategory(task, Template.getCatFromClassList(elem));
@@ -261,18 +251,18 @@ Board.prototype.makeTasksDraggable = function () {
     }
 
     if (!this.list) {
-      // At this point we know we are making a new task
-      // TODO This new task logic needs to be ~ this.newTask()
-      // TODO don't repeat yourself
+      console.log('Dragging task in board mode.');
       if (data.task === null) {
-        task = new Task({});
-        this.tasks.set(task.created, task);
+        task = this.newTask();
         this.putTask(task);
       } else {
+        console.log('Loading task from map using key', data.task)
         task = this.tasks.get(data.task);
       }
+      console.log('Load...', this.tasks, task);
 
-      task.x = clamp (0, data.dx + event.clientX, this.width - task.node.offsetWidth);
+      task.x = clamp (0, data.dx + event.clientX,
+        this.width - task.node.offsetWidth);
       task.y = clamp (0, data.dy + event.clientY, this.node.getBoundingClientRect().bottom);
       this.moveTaskToTop(task);
       task.setStyles();
@@ -280,9 +270,18 @@ Board.prototype.makeTasksDraggable = function () {
     }
 
     this.saveTasks();
-  });
+  };
 
-  document.addEventListener('dragend', event => {
+  this.node.addEventListener('dragstart', dragstartHandler);
+  this.node.addEventListener('dragover', dragoverHandler);
+  this.node.addEventListener('dragleave', event => {
+    if (!this.list) return false;
+    if (event.target.classList.contains('task-drop-target')) {
+      event.target.classList.remove('drop-hover');
+    }
+  });
+  this.node.addEventListener('drop', dropHandler);
+  this.node.addEventListener('dragend', event => {
     event;//TODO anything else?
   });
 };
@@ -292,8 +291,7 @@ Board.prototype.loadTasks = function () {
   const tasksStored = localStorage.getItem(`tasks-${this.name}`);
   const tasksStr = tasksStored !== null ? tasksStored : 'null';
 
-  if (tasksStored === null)
-    return this.tasks = new Map();
+  if (tasksStored === null) return this.tasks = new Map();
 
   return this.tasks = new Map(JSON.parse(tasksStr).map( props =>
     [props.created, new Task(props)]));
@@ -302,13 +300,11 @@ Board.prototype.loadTasks = function () {
 Board.prototype.moveTaskToTop = function (task) {
   const tasks = Array.from(this.tasks.values());
   const zs = tasks.map(t => t === task ? null : t.z);
-
+  if (task.z !== undefined)
+    this.tasks.forEach(t => { if (t.z > task.z) t.z--; t.setStyles(); });
   let mex = Board.BASE_Z_INDEX;
   while (zs.includes(mex)) mex++;
-
-  // Move every node above its prev pos down by 1
-  this.tasks.forEach(t => { if (t.z > task.z) t.z--; t.setStyles(); });
-  return task.z = mex;
+  task.z = mex;
 };
 
 Board.prototype.deleteTask = function (task) {

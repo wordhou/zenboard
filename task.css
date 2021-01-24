@@ -2,7 +2,7 @@
   font-family: Helvetica;
   font-size: inherit;
   height: auto;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 1 2px 3px rgba(0, 0, 0, 0.2);
   background-color: lightgoldenrodyellow;
   border-radius: 5px;
   overflow: auto;
@@ -10,6 +10,8 @@
 }
 
 .todo.dummy {
+  position: absolute;
+  z-index: -100;
 }
 
 .todo.drop-hover * {
@@ -17,11 +19,11 @@
 }
 
 .todo:hover {
-  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .todo:focus-within {
-  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.4);
   filter: contrast(120%) saturation(120%);
 }
 

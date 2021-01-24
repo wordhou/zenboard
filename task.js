@@ -49,9 +49,8 @@ Task.prototype.toJSON = function () {
 Task.prototype.render = function () {
   const e = document.createElement('div');
   e.classList.add('todo', 'task-drop-target');
-  Task.flags.forEach ( flag => {
-    if (this[flag]) e.classList.add(flag);
-  });
+  Task.flags.filter(f => this[f]).forEach(f => e.classList.add(f));
+
   e.setAttribute('draggable', !this.pin);
   e.dataset.created = this.created;
   e.innerHTML = `<textarea placeholder="Todo...">${this.text}</textarea>
