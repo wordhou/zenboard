@@ -95,7 +95,6 @@ Task.renderDummy = function () {
     <li><a class="flag"><svg><use href="#flag" /></svg></a> </li>
     <li><a class="trash"><svg><use href="#trash" /></svg></a> </li>
     </ul>`;
-  e.style.zIndex = -100;
   return e;
 }
 

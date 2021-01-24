@@ -4,9 +4,17 @@
  * Manages the global state of the application as well as saving and
  * loading information from localStorage.
  */
-function State ({ boardListNode, boardNode }) {
-  this.boardListNode = boardListNode;
-  this.boardNode = boardNode;
+function State ({ boardList, board, spinner, newTask, newBoard
+  , deleteBoard, toggleView}) {
+  this.nodes = {
+    board,
+    boardList,
+    spinner,
+    newTask,
+    newBoard,
+    deleteBoard,
+    toggleView
+  };
 }
 
 State.DEFAULT_BOARD_NAME = 'Default Board';
@@ -46,7 +54,7 @@ State.prototype._setBoard = function (board) {
   this.current = board.name;
   this.board = board;
   if (board.tasks === undefined) board.loadTasks(); //
-  board.attach(this.boardNode);
+  board.attach(this.nodes.board, this.nodes.spinner);
   this._styleActiveListing();
   this.save();
 };
@@ -56,7 +64,7 @@ State.prototype.changeTemplate = function (board, templateName) {
   board.loadTemplate();
   if (this.board === board) {
     board.render();
-    board.attach(this.boardNode);
+    board.attach(this.boardNode, this.nodes.spinner);
   }
 }
 
@@ -105,7 +113,7 @@ State.prototype.addBoard = function (board) {
 
 State.prototype._attachListing = function (board) {
   board.renderListing();
-  this.boardListNode.appendChild(board.listingNode);
+  this.nodes.boardList.appendChild(board.listingNode);
 };
 
 State.prototype.renameBoard = function (board, newName) {
@@ -184,22 +192,21 @@ State.prototype._addHandlers = function () {
 
   document.addEventListener('boardchange', () => this.save());
 
-  $('new-task').addEventListener('click', () => {
+  this.nodes.newTask.addEventListener('click', () => {
     const task = this.board.newTask();
     this.board.putTask(task);
     task.node.focus();
     this.board.saveTasks();
   });
 
-  $('new-task').addEventListener('dragstart', event => {
+  this.nodes.newTask.addEventListener('dragstart', event => {
     this.board.dragNewTaskHandler(event);
   });
 
-  $('new-board').addEventListener('click', () => this.newBoard());
-  $('delete-board').addEventListener('click', () => this.deleteBoard());
-  const toggleViewButton = $('toggle-view');
-  $('toggle-view').addEventListener('click', () => {
-    toggleViewButton.classList.toggle('on');
+  this.nodes.newBoard.addEventListener('click', () => this.newBoard());
+  this.nodes.deleteBoard.addEventListener('click', () => this.deleteBoard());
+  this.nodes.toggleView.addEventListener('click', () => {
+    this.nodes.toggleView.classList.toggle('on');
     this.toggleView();
   });
 };

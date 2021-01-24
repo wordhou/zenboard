@@ -153,12 +153,14 @@ Board.prototype.render = function () {
 }
 
 /** Makes sure board is rendered and attaches it to the DOM target node */
-Board.prototype.attach = function (target) {
+Board.prototype.attach = function (target, spinner) {
+  if (spinner !== undefined) spinner.classList.add('on');
   if (this.node === undefined) this.render();
   // Replaces the element `<div id="board">` with our new element
   target.innerHTML = '';
-  target.appendChild(this.node);
   target.appendChild(this.dummyTask);
+  target.appendChild(this.node);
+  if (spinner !== undefined) spinner.classList.remove('on');
 };
 
 Board.prototype.addHandlers = function () {
@@ -166,13 +168,6 @@ Board.prototype.addHandlers = function () {
   this.node.addEventListener('taskdelete', e => this.deleteTask(e.detail));
   this.makeTasksDraggable();
 };
-
-// TODO remove
-Board.prototype.removeHandlers = function () {
-  if (this.handlers === undefined) return;
-  $('new-task').removeEventListener('dragstart', this.handlers.dragNewTaskHandler);
-  document.removeEventListener('drop', this.handlers.dropHandler);
-}
 
 /** Attaches all event listeners to the DOM element for a task */
 Board.prototype.makeTasksDraggable = function () {
