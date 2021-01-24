@@ -1,4 +1,5 @@
 #board-drawer {
+  flex: 0 1;
   margin-left: -20rem;
   font-size: 0.8rem;
   background-color: ghostwhite;

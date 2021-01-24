@@ -48,7 +48,7 @@ Template.getTemplate = function (template) {
   return Template.templates.get(template);
 }
 
-Template.prototype.render = function (cat) {
+Template.prototype.renderCategory = function (cat) {
   const element = document.createElement('div');
   element.className = 'category';
   element.innerHTML = `<header>${cat}</header>

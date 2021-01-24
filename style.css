@@ -3,10 +3,6 @@ body {
   font-family: Helvetica;
 }
 
-h1 {
-  font-size: 1.5em;
-}
-
 #container {
   display: flex;
   flex-flow: column;

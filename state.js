@@ -43,7 +43,7 @@ State.prototype._setupNew = function () {
   const def = State.DEFAULT_BOARD_NAME;
   this.boards = new Map();
   
-  const defaultBoard = new Board({name: def, width: 1024});
+  const defaultBoard = new Board({name: def});
   defaultBoard.saveTasks(); // TODO necessary?
   this.addBoard(defaultBoard);
   this._setBoard(defaultBoard);
@@ -62,12 +62,13 @@ State.prototype._setBoard = function (board) {
 };
 
 State.prototype.changeTemplate = function (board, templateName) {
-  board.templateName = templateName;
+  board.template = templateName;
   board.loadTemplate();
   if (this.board === board) {
     board.render();
-    board.attach(this.boardNode, this.nodes.spinner);
+    board.attach(this.nodes.board, this.nodes.spinner);
   }
+  this.save();
 }
 
 State.prototype._styleActiveListing = function () {

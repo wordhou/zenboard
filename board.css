@@ -1,52 +1,11 @@
 #board-component {
-  flex: 1;
-
+  flex: 1 0;
   display: flex;
   flex-flow: row;
   min-height: 1000px;
 }
-
-@keyframes spin {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
-.progress-spinner {
-  display: none;
-}
-
-.progress-spinner.on {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 100;
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-  align-items: center;
-  background-color: darkgrey;
-  opacity: 0.5;
-}
-
-.progress-spinner::after {
-  border: solid 1em #000;
-  border-bottom-color: darkgrey;
-  border-radius: 50%;
-  content: "";
-  height: 3em;
-  width: 3em;
-  transform: translate(-50%, -50%);
-  transform-origin: center;
-  animation: 2s linear infinite spin;
-}
-
 #board-component main {
+  flex: 1 0;
   position: relative;
 }
 
@@ -55,6 +14,11 @@
   display: flex;
   flex-flow: column;
   align-items: center;
+  flex: 0 0;
+}
+
+#board-wrapper {
+  flex: 1 0;
 }
 
 #board-component nav .button {
@@ -79,6 +43,7 @@
 }
 
 .board {
+  flex: 1;
   position: relative;
   background-color: lightgray;
   display: flex;
@@ -96,6 +61,7 @@
 }
 
 .category {
+  flex: 1 1 0;
 }
 
 .board.list-view .category header {
@@ -119,7 +85,8 @@
 }
 
 .todo {
+  display: block;
   position: absolute;
   box-sizing: border-box;
-  width: 17em;
+  min-width: 15em;
 }

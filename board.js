@@ -6,18 +6,16 @@ function Board({
   description = '',
   template = Template.default,
   list = false,
-  width=1024
 }) {
   this.name = name;
   this.description = description;
   this.template = template;
-  this.width = width;
   this.list = list;
   this.dummyTask = Task.renderDummy();
-  this.currentTemplate = Template.getTemplate(this.template);
+  this.loadTemplate();
 }
 
-Board.storableProperties = ['name', 'description', 'template', 'width', 'list'];
+Board.storableProperties = ['name', 'description', 'template',  'list'];
 
 Board.prototype.toJSON = function () {
   const obj = {};
@@ -45,17 +43,18 @@ Board.prototype.newTaskPosition = function () {
   let y0 = 25;
   let x0 = 10;
 
+  const rect = this.node.getBoundingClientRect();
   const pos = {x: x0, y: y0};
   const bad = p => Array.from(this.tasks.values()).some(t => dist(p, t) < 5);
   while (bad(pos)) {
     pos.x += 60;
     pos.y += 10;
-    if (pos.x + Task.MAX_WIDTH > this.width) {
+    if (pos.x + Task.MAX_WIDTH > rect.width) {
       y0 += 80;
       pos.x = x0;
       pos.y = y0;
     }
-    if (pos.x + Task.MAX_WIDTH > this.width && pos.y > 800) {
+    if (pos.x + Task.MAX_WIDTH > rect.width && pos.y > 800) {
       return {x: 25, y: 25}; //Don't loop forever
     }
   }
@@ -136,13 +135,12 @@ Board.prototype.render = function () {
   const element = document.createElement('div');
 
   element.classList.add('board');
-  element.style.width = `${this.width}px`;
   if (this.list) element.classList.add('list-view');
   this.node = element;
 
   this.categoryNodes = {};
   this.currentTemplate.categories.forEach ( (_value, cat) => {
-    const catElement = this.currentTemplate.render(cat);
+    const catElement = this.currentTemplate.renderCategory(cat);
     this.categoryNodes[cat] = catElement.lastChild;
     this.node.appendChild(catElement);
   });
@@ -256,8 +254,9 @@ Board.prototype.makeTasksDraggable = function () {
       }
       console.log('Load...', this.tasks, task);
 
+      const rect = this.node.getBoundingClientRect();
       task.x = clamp (0, data.dx + event.clientX,
-        this.width - task.node.offsetWidth);
+        rect.width - task.node.offsetWidth);
       task.y = clamp (0, data.dy + event.clientY, this.node.getBoundingClientRect().bottom);
       this.moveTaskToTop(task);
       task.setStyles();
@@ -290,6 +289,10 @@ Board.prototype.loadTasks = function () {
 
   return this.tasks = new Map(JSON.parse(tasksStr).map( props =>
     [props.created, new Task(props)]));
+};
+
+Board.prototype.loadTemplate = function () {
+  this.currentTemplate = Template.getTemplate(this.template);
 };
 
 Board.prototype.moveTaskToTop = function (task) {
@@ -410,10 +413,8 @@ Board.prototype.saveTasks = function () {
   localStorage.setItem(`tasks-${this.name}`, taskString);
 };
 
-Board.prototype.resize = function (width) {
-  this.width = width;
-  this.node.style.width = `${width}px`;
-  this.markChanged();
+Board.prototype.moveTasksIntoView = function () {
+  this.node.getBoundingClientRect();
 };
 
 Board.prototype.markChanged = function () {
