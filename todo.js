@@ -10,6 +10,7 @@ function makeExpandible (expandible, handle) {
 var state; // DEBUG:
 window.addEventListener('load', () => {
   makeExpandible($('board-drawer'), $('board-drawer-handle'));
+  makeExpandible($('template-list'), $('template-list-expander'));
 
   state = new State({
     board: $('board-wrapper'),

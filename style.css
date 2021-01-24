@@ -6,6 +6,7 @@ body {
 #container {
   display: flex;
   flex-flow: column;
+  min-height: 100vh;
 }
 
 #container > header {
@@ -13,20 +14,18 @@ body {
   font-size: 1.5em;
   background-color: lightslategray;
   padding: 0.5em;
-  width: 100%;
 }
 
 #container > footer {
   flex: 0;
   background-color: magenta;
-  width: 100%;
 }
 
 #middle {
   flex: 1;
 
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: row;
   justify-content: left;
   align-items: stretch;
 }

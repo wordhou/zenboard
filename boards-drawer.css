@@ -1,5 +1,4 @@
 #board-drawer {
-  flex: 0 1;
   margin-left: -20rem;
   font-size: 0.8rem;
   background-color: ghostwhite;
@@ -44,7 +43,7 @@
 
 #board-list header nav a {
   display: flex;
-  flex-flow: column nowrap;
+  flex-flow: column;
   align-items: center;
 }
 

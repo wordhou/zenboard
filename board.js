@@ -414,7 +414,13 @@ Board.prototype.saveTasks = function () {
 };
 
 Board.prototype.moveTasksIntoView = function () {
-  this.node.getBoundingClientRect();
+  const rect = this.node.getBoundingClientRect();
+  this.tasks.forEach( task => {
+    task.x = clamp(0, task.x, rect.width - task.node.offsetWidth);
+    task.y = clamp(0, task.y, rect.height - task.node.offsetHeight);
+    task.setStyles();
+    this.saveTasks();
+  });
 };
 
 Board.prototype.markChanged = function () {

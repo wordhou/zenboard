@@ -19,6 +19,7 @@ function State ({ boardList, board, spinner, newTask, newBoard
 
 State.DEFAULT_BOARD_NAME = 'Default Board';
 State.NEW_BOARD_NAME = 'New Board';
+State.MIN_BOARD_WIDTH = 720;
 
 /** Tries to load boards, current board and settings from localStorage */
 State.prototype.load = function() {
@@ -182,6 +183,12 @@ State.prototype._loadLastBoard = function () {
 };
 
 State.prototype._addHandlers = function () {
+  window.addEventListener('resize', () => {
+    if (this.board.list) return false;
+    if (this.board.node.offsetWidth <= State.MIN_BOARD_WIDTH)
+      return this.toggleView();
+    this.board.moveTasksIntoView();
+  });
   document.addEventListener('boardselect', event => {
     this.loadBoard(event.detail);
   }, true);
@@ -209,14 +216,14 @@ State.prototype._addHandlers = function () {
   this.nodes.newBoard.addEventListener('click', () => this.newBoard());
   this.nodes.deleteBoard.addEventListener('click', () => this.deleteBoard());
   this.nodes.toggleView.addEventListener('click', () => {
-    this.nodes.toggleView.classList.toggle('on');
     this.toggleView();
   });
 };
 
 State.prototype.toggleView = function () {
   this.board.list = !this.board.list;
-  this.save();
-
   this.board.node.classList.toggle('list-view');
+  if (!this.board.list) this.nodes.toggleView.classList.remove('on');
+  if (this.board.list) this.nodes.toggleView.classList.add('on');
+  this.save();
 };

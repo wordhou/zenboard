@@ -21,6 +21,13 @@ const autoResize = function (text) {
   setTimeout(resizeTextarea, 0);
 };
 
+function makeExpandible (expandible, handle) {
+  handle.addEventListener('click', () => {
+    expandible.classList.toggle('expanded');
+    handle.classList.toggle('expanded');
+  });
+}
+
 /**
  * Returns a click handler used to make a text field editable.
  * @param editTrigger - The element that triggers the edit. 

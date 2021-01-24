@@ -13,6 +13,7 @@ Template.templates = new Map (
 [
   {
     "name": "Default",
+    "description": "",
     "categories": [
       ["Todo", {
         "title": "Todo list",
@@ -24,6 +25,7 @@ Template.templates = new Map (
   },
   {
     "name": "Trifold",
+    "description": "",
     "categories": [
       ["Todo", {
         "title": "Todo list",
@@ -48,6 +50,14 @@ Template.getTemplate = function (template) {
   return Template.templates.get(template);
 }
 
+Template.renderTemplateListing = function (template) {
+  const element = document.createElement('li');
+  element.className = 'template-listing';
+  element.innerHTML = `<h1>${template.title}</h1>
+    ${template.description}`;
+  return element;
+}
+
 Template.prototype.renderCategory = function (cat) {
   const element = document.createElement('div');
   element.className = 'category';
@@ -55,15 +65,6 @@ Template.prototype.renderCategory = function (cat) {
     <div class="task-container cat-${cat} task-drop-target"></div>`;
   return element;
 };
-
-/*
-Template.loadTemplates = function (json) {
-  Template.templates = JSON.parse(json).map( v => [ v.name, new Template(v) ] );
-};
-
-Template.loadTemplates (`
-`);
-*/
 
 Template.getCatFromClassList = function (elem) {
   for (let s of elem.classList.values()) {
