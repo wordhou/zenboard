@@ -1,57 +1,63 @@
-#boards-drawer {
-  width: 20em;
-  background-color: lightsalmon;
+#board-drawer {
+  margin-left: -20rem;
+  font-size: 0.8rem;
+  background-color: ghostwhite;
 
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: row;
+  transition: 0.5s all ease;
 }
 
-#boards-drawer-expandible {
-  flex: 1;
+#board-drawer.expanded {
+  margin-left: 0;
+  transition: 0.5s all ease;
 }
 
-#boards-drawer-handle {
-  flex: 0;
+#board-list {
+  width: 20rem;
+}
+
+#board-drawer-handle {
   background-color: yellow;
-  width: 2em;
+  width: 1.5em;
 
   display: flex;
   justify-content: center;
   flex-direction: column;
 }
 
-#boards-drawer-handle svg,
-#boards-drawer-handle use {
-  height: 4em;
-  width: 1.5em;
-}
-
-#boards-drawer-header {
+#board-list header {
+  background-color: lightsteelblue;
   display: flex;
   flex-flow: column;
-  background-color: royalblue;
+  padding: 0.5em;
 }
 
-#boards-drawer-header-actions {
+#board-list header nav {
   display: flex;
   flex-flow: row;
   justify-content: space-between;
 }
 
-#boards-drawer-header-actions li {
+#board-list header nav a {
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
 }
 
-#boards-drawer-header-actions svg {
+#board-list header nav svg,
+#board-list header nav use {
   width: 30px;
   height: 30px;
 }
 
-#boards-drawer-header-actions use {
-  width: 30px;
-  height: 30px;
+#board-drawer-handle svg {
+  height: 3em;
+  width: 100%;
+}
+#board-drawer-handle use {
+  height: 100%;
+  width: 100%;
 }
 
 .board-listing-component {
@@ -66,7 +72,6 @@
 }
 
 .listing-icon {
-  width: 40;
   font-size: 3em;
   flex: 0;
 }
@@ -107,17 +112,14 @@
   background: transparent;
   resize: none;
   min-height: 1em;
-  max-height: 4em;
 }
 
 .listing-name .field h1 {
   font-size: 1.5em;
-  font-family: "Lucida Sans";
 }
 
 .listing-main .field h2 {
   font-size: 1em;
-  font-family: "Lucida Sans";
   color: darkslategrey;
 }
 

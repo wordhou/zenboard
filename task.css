@@ -6,7 +6,14 @@
   background-color: lightgoldenrodyellow;
   border-radius: 5px;
   overflow: auto;
-  padding: 0.3em;
+  padding: 0.5em;
+}
+
+.todo.dummy {
+}
+
+.todo.drop-hover * {
+  pointer-events: none;
 }
 
 .todo:hover {
@@ -15,7 +22,11 @@
 
 .todo:focus-within {
   box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.2);
-  background-color: yellow;
+  filter: contrast(120%) saturation(120%);
+}
+
+.todo.drop-hover {
+  filter: brightness(0.8);
 }
 
 .todo textarea,
@@ -36,19 +47,22 @@
   font-size: inherit;
   font-family: Helvetica;
 }
+
 .todo textarea:focus {
 }
 
 .todo .due {
 }
 
-.expand {
+.todo .expandible {
   overflow: hidden;
   height: 0;
   transition: all 0.5s ease;
 }
-.expand.on {
+
+.todo.expand .expandible {
   height: 1.2em;
+  transition: all 0.5s ease;
 }
 
 ul.icons {
@@ -74,22 +88,29 @@ ul.icons svg symbol {
   height: 20px;
 }
 
-ul.icons .done.on svg {
+.todo.done {
+}
+
+.todo.flag {
+  background-color: lightsalmon;
+}
+
+.todo.done .done svg {
   fill: olivedrab;
 }
-ul.icons li:hover .done.on svg {
+.todo.done li:hover .done svg {
   fill: darkseagreen;
 }
-ul.icons .flag.on svg {
+.todo.flag .flag svg {
   fill: firebrick;
 }
-ul.icons li:hover .flag.on svg {
+.todo.flag li:hover .flag.on svg {
   fill: indianred;
 }
-ul.icons .pin.on svg {
+.todo.pin .pin svg {
   fill: deepskyblue;
 }
-ul.icons li:hover .pin.on svg {
+.todo.pin li:hover .pin svg {
   fill: lightskyblue;
 }
 ul.icons li:hover svg {

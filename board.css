@@ -1,6 +1,45 @@
+#board-component {
+  flex: 1;
+
+  display: flex;
+  flex-flow: row;
+  min-height: 1000px;
+}
+
+#board-component main {
+  position: relative;
+}
+
+#board-component nav {
+  width: 4em;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+#board-component nav .button {
+  margin-bottom: 1em;
+}
+
+#board-component nav .button svg,
+#board-component nav .button use {
+  height: 3em;
+  width: 3em;
+}
+
+#select-template .expandible {
+}
+
+#select-template.expanded .expandible {
+}
+
+#board-wrapper {
+  display: flex;
+  flex-flow: row;
+}
+
 .board {
   position: relative;
-  height: 800px;
   background-color: lightgray;
   display: flex;
   flex-flow: row;
@@ -8,17 +47,28 @@
 }
 
 .board.list-view {
-}
-
-.board .category {
-}
-
-.category {
-  border-radius: 5px;
-  background-color: darkgray;
+  width: auto;
 }
 
 .board.list-view .category {
+  display: flex;
+  flex-flow: column;
+}
+
+.category {
+}
+
+.board.list-view .category header {
+  flex: 0;
+}
+
+.task-container.drop-hover {
+  border-radius: 5px;
+  background-color: gray;
+}
+
+.board.list-view .task-container {
+  flex: 1;
   display: flex;
   flex-flow: column nowrap;
 }

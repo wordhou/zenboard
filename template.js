@@ -3,7 +3,7 @@
  */
 function Template({ name, categories, def }) {
   this.name = name;
-  this.categories = categories;
+  this.categories = new Map(categories);
   this.def = def;
 }
 
@@ -13,16 +13,48 @@ Template.templates = new Map (
 [
   {
     "name": "Default",
-    "categories": ["Todo"],
+    "categories": [
+      ["Todo", {
+        "title": "Todo list",
+        "styles": {}
+      }]
+    ],
+    "styles": {},
     "def": "Todo"
   },
   {
     "name": "Trifold",
-    "categories": ["Todo", "In Progress", "Completed"],
+    "categories": [
+      ["Todo", {
+        "title": "Todo list",
+        "styles": {}
+      }],
+      ["Inprogress", {
+        "title": "In progress",
+        "styles": {}
+      }],
+      ["Complete", {
+        "title": "Completed",
+        "styles": {}
+      }],
+    ],
+    "styles": {},
     "def": "Todo"
   },
 ].map( t => [t.name, new Template(t)])
 );
+
+Template.getTemplate = function (template) {
+  return Template.templates.get(template);
+}
+
+Template.prototype.render = function (cat) {
+  const element = document.createElement('div');
+  element.className = 'category';
+  element.innerHTML = `<header>${cat}</header>
+    <div class="task-container cat-${cat} task-drop-target"></div>`;
+  return element;
+};
 
 /*
 Template.loadTemplates = function (json) {

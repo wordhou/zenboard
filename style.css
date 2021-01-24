@@ -1,5 +1,42 @@
 body {
   font-size: 12pt;
+  font-family: Helvetica;
+}
+
+h1 {
+  font-size: 1.5em;
+}
+
+#container {
+  display: flex;
+  flex-flow: column;
+}
+
+#container > header {
+  flex: 0;
+  font-size: 1.5em;
+  background-color: lightslategray;
+  padding: 0.5em;
+  width: 100%;
+}
+
+#container > footer {
+  flex: 0;
+  background-color: magenta;
+  width: 100%;
+}
+
+#middle {
+  flex: 1;
+
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: left;
+  align-items: stretch;
+}
+
+#toggle-view.on {
+  fill: lightsteelblue;
 }
 
 .indicator .open,
@@ -10,62 +47,4 @@ body {
 .indicator.expanded .open,
 .indicator .close {
   display: block;
-}
-
-.expandible.expanded {
-  margin-left: 0;
-}
-
-.expandible {
-  margin-left: -18em;
-  transition: all 0.5s ease;
-}
-
-#layout {
-  display: flex;
-  flex-flow: column nowrap;
-}
-
-#header {
-  background-color: magenta;
-}
-
-#footer {
-  background-color: magenta;
-  width: 100%;
-}
-
-#content {
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: left;
-  align-items: stretch;
-}
-
-#content-right {
-  display: flex;
-  flex-flow: row;
-}
-
-#board-wrapper {
-  position: relative;
-}
-
-#board-controls {
-  display: flex;
-  flex-flow: column;
-}
-
-#board-controls .button {
-  margin-bottom: 1em;
-}
-
-#board-controls .button svg,
-#board-controls .button use {
-  height: 3em;
-  width: 3em;
-}
-
-#toggle-view.on {
-  fill: lightsteelblue;
 }

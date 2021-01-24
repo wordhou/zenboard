@@ -13,6 +13,8 @@ function Board({
   this.template = template;
   this.width = width;
   this.list = list;
+  this.dummyTask = Task.renderDummy();
+  this.currentTemplate = Template.getTemplate(this.template);
 }
 
 Board.storableProperties = ['name', 'description', 'template', 'width', 'list'];
@@ -60,6 +62,7 @@ Board.prototype.newTaskPosition = function () {
 
 // Reindexes the order values in the category that the task is in
 Board.prototype.removeTaskFromCategory = function (task) {
+  if (task.category === undefined) return false;
   const nodes = Array.from(this.categoryNodes[task.category].children);
   const tasks = nodes.map(node => this.tasks.get(node.dataset.created));
   tasks.forEach(t => { if (t.order > task.order) {
@@ -78,13 +81,10 @@ Board.prototype.removeTaskFromCategory = function (task) {
  */
 Board.prototype.putTask = function (task, cat, pos) {
   // TODO Check if cat is reasonable and throw error otherwise
-  const template = Template.templates.get(this.template);
-  task.category = cat === undefined ? template.def : cat;
+  task.category = cat === undefined ? this.currentTemplate.def : cat;
   const categoryNode = this.categoryNodes[task.category];
   const tasks = Array.from(categoryNode.children)
     .map(node => this.tasks.get(node.dataset.created));
-  console.log('putTask: Here are the nodes currently in the cat before:',
-    Array.from(tasks.map(t => `${t.order}: ${t.text}`)));
   const orders = tasks.map(task => task.order);
 
   if (pos === undefined) { // Put element in least unoccupied slot
@@ -103,11 +103,6 @@ Board.prototype.putTask = function (task, cat, pos) {
   }
   task.setStyles();
   task.attach(this.categoryNodes[task.category]);
-  console.log('putTask: Here are the orders after:',
-      Array.from(categoryNode.children)
-          .map(node => this.tasks.get(node.dataset.created))
-          .map(t => `${t.order}: ${t.text}`));
-
   this.saveTasks();
   return task;
 }
@@ -136,19 +131,16 @@ Board.prototype.moveTaskToCategory = function (task, cat, pos) {
 
 Board.prototype.render = function () {
   const element = document.createElement('div');
+
   element.classList.add('board');
   element.style.width = `${this.width}px`;
   if (this.list) element.classList.add('list-view');
   this.node = element;
 
-  const temp = Template.templates.get(this.template);
-
   this.categoryNodes = {};
-  temp.categories.forEach ( cat => {
-    // TODO move this into a method Template.proto...renderCategory(cat)
-    const catElement = document.createElement('div');
-    catElement.className = `category task-drop-target cat-${cat}`;
-    this.categoryNodes[cat] = catElement;
+  this.currentTemplate.categories.forEach ( (_value, cat) => {
+    const catElement = this.currentTemplate.render(cat);
+    this.categoryNodes[cat] = catElement.lastChild;
     this.node.appendChild(catElement);
   });
 
@@ -165,6 +157,7 @@ Board.prototype.attach = function (target) {
   // Replaces the element `<div id="board">` with our new element
   target.innerHTML = '';
   target.appendChild(this.node);
+  target.parentNode.appendChild(this.dummyTask);
 };
 
 Board.prototype.addHandlers = function () {
@@ -178,7 +171,20 @@ Board.prototype.addHandlers = function () {
 
 /** Attaches all event listeners to the DOM element for a task */
 Board.prototype.makeTasksDraggable = function () {
+  document.getElementById('new-task').addEventListener('dragstart', event => {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setDragImage(this.dummyTask, 0, 0);
+    const data = {
+      task: null,
+      dx: 0,
+      dy: 0
+    };
+    event.dataTransfer.setData('text/plain', JSON.stringify(data));
+
+  });
+
   this.node.addEventListener('dragstart', event => {
+    event.stopPropagation();
     // Check whether ancestor contains class
     let elem = event.target;
     // TODO stop before elem == document
@@ -205,15 +211,15 @@ Board.prototype.makeTasksDraggable = function () {
 
   this.node.addEventListener('dragover', event => {
     event.preventDefault();
-    if (this.list && event.target.classList.contains('task-drop-target')) {
-      event.preventDefault();
+    if (!this.list) return false;
+    if (event.target.classList.contains('task-drop-target')) {
       event.target.classList.add('drop-hover');
     }
-    return false; // TODO is this necessary to return false?
   });
 
   this.node.addEventListener('dragleave', event => {
-    if (this.list && event.target.classList.contains('task-drop-target')) {
+    if (!this.list) return false;
+    if (event.target.classList.contains('task-drop-target')) {
       event.target.classList.remove('drop-hover');
     }
   });
@@ -221,7 +227,9 @@ Board.prototype.makeTasksDraggable = function () {
   document.addEventListener('drop', event => {
     event.preventDefault();
     const data = JSON.parse(event.dataTransfer.getData('text/plain'));
-    const task = this.tasks.get(data.task);
+    let task;
+
+    event.target.classList.remove('drop-hover');
 
     if (this.list) {
       var elem = event.target;
@@ -231,7 +239,16 @@ Board.prototype.makeTasksDraggable = function () {
       }
       console.log('dropevent target elem:', elem);
       if (elem === task) return false;
-      if (elem.classList.contains('category')) {
+      // At this point we know we are making a new task
+      // TODO This new task logic needs to be ~ this.newTask()
+        if (data.task === null) {
+          task = new Task({});
+          this.tasks.set(task.created, task) 
+        } else {
+          task = this.tasks.get(data.task);
+        }
+
+      if (elem.classList.contains('task-container')) {
         this.moveTaskToCategory(task, Template.getCatFromClassList(elem));
       }
       if (elem.classList.contains('todo')) {
@@ -241,6 +258,17 @@ Board.prototype.makeTasksDraggable = function () {
     }
 
     if (!this.list) {
+      // At this point we know we are making a new task
+      // TODO This new task logic needs to be ~ this.newTask()
+      // TODO don't repeat yourself
+      if (data.task === null) {
+        task = new Task({});
+        this.tasks.set(task.created, task);
+        this.putTask(task);
+      } else {
+        task = this.tasks.get(data.task);
+      }
+
       task.x = clamp (0, data.dx + event.x, this.width - task.node.offsetWidth);
       task.y = clamp (0, data.dy + event.y, 100000);
       this.moveTaskToTop(task);
@@ -249,7 +277,7 @@ Board.prototype.makeTasksDraggable = function () {
   });
 
   document.addEventListener('dragend', event => {
-    event;//TODO anything?
+    event;//TODO anything else?
   });
 };
 
@@ -274,6 +302,7 @@ Board.prototype.moveTaskToTop = function (task) {
 
   // Move every node above its prev pos down by 1
   this.tasks.forEach(t => { if (t.z > task.z) t.z--; t.setStyles(); });
+  this.saveTasks();
   return task.z = mex;
 };
 

@@ -3,8 +3,8 @@
 var state; // DEBUG:
 window.addEventListener('load', () => {
   (() => {
-    const expandible = $('boards-drawer');
-    const handle = $('boards-drawer-handle');
+    const expandible = $('board-drawer');
+    const handle = $('board-drawer-handle');
 
     handle.addEventListener('click', () => {
       expandible.classList.toggle('expanded');
@@ -14,7 +14,7 @@ window.addEventListener('load', () => {
 
   state = new State({
     boardNode: document.getElementById('board-wrapper'),
-    boardListNode: document.getElementById('board-list')
+    boardListNode: document.getElementById('board-list-content')
   });
   state.load();
 });
