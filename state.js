@@ -54,6 +54,7 @@ State.prototype._setBoard = function (board) {
 
 State.prototype.changeTemplate = function (board, templateName) {
   board.templateName = templateName;
+  board.loadTemplate();
   if (this.board === board) {
     board.render();
     board.attach(this.boardNode);
@@ -187,13 +188,7 @@ State.prototype._addHandlers = function () {
 
   document.addEventListener('boardchange', () => this.save());
 
-  $('new-task').addEventListener('click', () => {
-    const task = this.board.newTask();
-
-    // TODO: On click, add task to random? board position;
-    // On hold, create drag and drop event listeners.
-    task.node.getElementsByTagName('textarea')[0].focus();
-  });
+  $('new-task').addEventListener('click', () => this.board.newTask());
 
   $('new-board').addEventListener('click', () => this.newBoard());
   $('delete-board').addEventListener('click', () => this.deleteBoard());

@@ -28,7 +28,6 @@ Board.prototype.toJSON = function () {
 // Updates the state and the DOM
 Board.prototype.newTask = function (props = {}) {
   const task = new Task(props);
-
   if (task.x === undefined) {
     const pos = this.newTaskPosition();
     task.x = pos.x;
@@ -39,6 +38,7 @@ Board.prototype.newTask = function (props = {}) {
   this.moveTaskToTop(task);
   this.putTask(task);
 
+  task.nodes.text.focus();
   return task;
 }
 
@@ -55,6 +55,9 @@ Board.prototype.newTaskPosition = function () {
       y0 += 80;
       pos.x = x0;
       pos.y = y0;
+    }
+    if (pos.x + Task.MAX_WIDTH > this.width && pos.y > 800) {
+      return {x: 25, y: 25}; //Don't loop forever
     }
   }
   return pos;
@@ -87,10 +90,11 @@ Board.prototype.putTask = function (task, cat, pos) {
     .map(node => this.tasks.get(node.dataset.created));
   const orders = tasks.map(task => task.order);
 
+  for (let t of categoryNode.children) t.classList.remove('drop-hover');
+
   if (pos === undefined) { // Put element in least unoccupied slot
     pos = 1;
     while (orders.includes(pos)) pos++;
-    console.log('putTask: Position not given. Position computed: ', pos);
     task.order = pos;
   } else {
     if (orders.includes(pos)) { // Shift elements
@@ -103,7 +107,7 @@ Board.prototype.putTask = function (task, cat, pos) {
   }
   task.setStyles();
   task.attach(this.categoryNodes[task.category]);
-  this.saveTasks();
+
   return task;
 }
 
@@ -146,8 +150,6 @@ Board.prototype.render = function () {
 
   // Add the tasks
   this.tasks.forEach(t => this.putTask(t, t.category, t.order));
-
-  console.log("Orders:", Array.from(this.tasks.values()).map(t => `${t.order}: ${t.text}`));
   this.addHandlers();
 }
 
@@ -174,10 +176,12 @@ Board.prototype.makeTasksDraggable = function () {
   document.getElementById('new-task').addEventListener('dragstart', event => {
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setDragImage(this.dummyTask, 0, 0);
+
+    const rect = this.node.getBoundingClientRect();
     const data = {
       task: null,
-      dx: 0,
-      dy: 0
+      dx: -rect.x,
+      dy:-rect.y 
     };
     event.dataTransfer.setData('text/plain', JSON.stringify(data));
 
@@ -201,8 +205,8 @@ Board.prototype.makeTasksDraggable = function () {
     event.dataTransfer.dropEffect = 'move'; // ?
     const data = { 
       task: task.created,
-      dx: task.x - event.x,
-      dy: task.y - event.y
+      dx: task.x - event.clientX,
+      dy: task.y - event.clientY
     }
     event.dataTransfer.setData('text/plain', JSON.stringify(data));
 
@@ -237,7 +241,6 @@ Board.prototype.makeTasksDraggable = function () {
         if (elem == document.body) return false;
         elem = elem.parentElement;
       }
-      console.log('dropevent target elem:', elem);
       if (elem === task) return false;
       // At this point we know we are making a new task
       // TODO This new task logic needs to be ~ this.newTask()
@@ -269,11 +272,14 @@ Board.prototype.makeTasksDraggable = function () {
         task = this.tasks.get(data.task);
       }
 
-      task.x = clamp (0, data.dx + event.x, this.width - task.node.offsetWidth);
-      task.y = clamp (0, data.dy + event.y, 100000);
+      task.x = clamp (0, data.dx + event.clientX, this.width - task.node.offsetWidth);
+      task.y = clamp (0, data.dy + event.clientY, this.node.getBoundingClientRect().bottom);
       this.moveTaskToTop(task);
       task.setStyles();
+      if (data.task === null) task.nodes.text.focus();
     }
+
+    this.saveTasks();
   });
 
   document.addEventListener('dragend', event => {
@@ -302,7 +308,6 @@ Board.prototype.moveTaskToTop = function (task) {
 
   // Move every node above its prev pos down by 1
   this.tasks.forEach(t => { if (t.z > task.z) t.z--; t.setStyles(); });
-  this.saveTasks();
   return task.z = mex;
 };
 
