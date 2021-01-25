@@ -89,3 +89,12 @@
   box-sizing: border-box;
   min-width: 15em;
 }
+
+.category header {
+  padding: 1em;
+  text-align: center;
+}
+
+.category header h1 {
+  font: bold 1.5em Lato;
+}

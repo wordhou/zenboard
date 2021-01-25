@@ -62,7 +62,8 @@ State.prototype._setBoard = function (board) {
   this.save();
 };
 
-State.prototype.changeTemplate = function (board, templateName) {
+State.prototype.changeTemplate = function (templateName, board) {
+  if (board === undefined) board = this.board;
   board.template = templateName;
   board.loadTemplate();
   if (this.board === board) {

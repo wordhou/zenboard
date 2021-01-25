@@ -74,6 +74,7 @@
 }
 
 .listing-icon {
+  display: none;
   font-size: 3em;
   flex: 0;
 }

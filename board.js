@@ -33,7 +33,6 @@ Board.prototype.newTask = function (props = {}) {
     task.y = pos.y;
   }
 
-  console.log('Adding new task to state.board.tasks map with key', task.created);
   this.tasks.set(task.created, task);
   this.moveTaskToTop(task);
   return task;
@@ -139,11 +138,7 @@ Board.prototype.render = function () {
   this.node = element;
 
   this.categoryNodes = {};
-  this.currentTemplate.categories.forEach ( (_value, cat) => {
-    const catElement = this.currentTemplate.renderCategory(cat);
-    this.categoryNodes[cat] = catElement.lastChild;
-    this.node.appendChild(catElement);
-  });
+  this.currentTemplate.attachCategories(this.node, this.categoryNodes);
 
   // Add the tasks
   this.tasks.forEach(t => this.putTask(t, t.category, t.order));
@@ -244,20 +239,16 @@ Board.prototype.makeTasksDraggable = function () {
     }
 
     if (!this.list) {
-      console.log('Dragging task in board mode.');
       if (data.task === null) {
         task = this.newTask();
         this.putTask(task);
       } else {
-        console.log('Loading task from map using key', data.task)
         task = this.tasks.get(data.task);
       }
-      console.log('Load...', this.tasks, task);
 
-      const rect = this.node.getBoundingClientRect();
       task.x = clamp (0, data.dx + event.clientX,
-        rect.width - task.node.offsetWidth);
-      task.y = clamp (0, data.dy + event.clientY, this.node.getBoundingClientRect().bottom);
+        this.node.clientWidth - task.node.offsetWidth);
+      task.y = clamp (0, data.dy + event.clientY, this.node.clientHeight);
       this.moveTaskToTop(task);
       task.setStyles();
       if (data.task === null) task.nodes.text.focus();

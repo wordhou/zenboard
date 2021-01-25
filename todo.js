@@ -1,17 +1,19 @@
-/* global $, clamp, autoResize, State, Task, Board */
+/* global $, makeExpandible, clamp, autoResize, Template, State */
 
-function makeExpandible (expandible, handle) {
-  handle.addEventListener('click', () => {
-    expandible.classList.toggle('expanded');
-    handle.classList.toggle('expanded');
+const addTemplateList = function (target, state) {
+  Template.templates.forEach((template, name) => {
+    const element = Template.renderTemplateListing(template);
+    element.addEventListener('click', () => state.changeTemplate(name));
+    target.appendChild(element);
   });
 }
 
 var state; // DEBUG:
 window.addEventListener('load', () => {
-  makeExpandible($('board-drawer'), $('board-drawer-handle'));
-  makeExpandible($('template-list'), $('template-list-expander'));
+  const $ = id => document.getElementById(id); // Alias for brevity
 
+  makeExpandible($('board-drawer'), $('board-drawer-handle'));
+  makeExpandible($('template-list-content'), $('template-list-expander'));
   state = new State({
     board: $('board-wrapper'),
     boardList: $('board-list-content'),
@@ -22,4 +24,6 @@ window.addEventListener('load', () => {
     toggleView: $('toggle-view')
   });
   state.load();
+
+  addTemplateList($('template-list-content'), state);
 });

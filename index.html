@@ -3,6 +3,9 @@
   <head>
   <meta charset="UTF-8">
   <title>Visual todo app</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+
   <link rel="stylesheet" href="reset.css"></link>
   <link rel="stylesheet" href="boards-drawer.css"></link>
   <link rel="stylesheet" href="style.css" id="style-main"></link>
@@ -56,16 +59,20 @@
       <section>
         <a id="new-task" class="button" draggable="true">
         <svg><use href="#plus-circle-fill" /></svg>
+        <label>New task</label>
         </a>
       </section>
       <section><a id="toggle-view" class="button">
         <svg><use href="#view-stacked" /></svg>
+        <label>Change view</label>
         </a>
       </section>
-      <section id="template-list-expander">
-        <a id="" class="button">
+      <section id="template-list-sec">
+        <a id="template-list-expander" class="button">
           <svg><use href="#bar-chart-steps" /></svg>
+          <label>Choose template</label>
         </a>
+        <div id="template-list-content" class="expanded"></div>
       </section>
     </nav>
     <main id="board-wrapper">

@@ -43,3 +43,16 @@ body {
 .indicator .close {
   display: block;
 }
+
+#template-list-expander {
+}
+#template-list-expander.expanded svg {
+  fill: lightgrey;
+}
+#template-list-content {
+  display: none;
+  position: absolute;
+}
+#template-list-content.expanded {
+  display: block;
+}

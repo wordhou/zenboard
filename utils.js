@@ -1,4 +1,3 @@
-const $ = id => document.getElementById(id); // Alias for brevity
 const clamp = (a, b, c) => Math.max(a, Math.min(b, c));
 
 const mex = function (arr, min = 1) {
