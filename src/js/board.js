@@ -80,8 +80,10 @@ Board.prototype.removeTaskFromCategory = function (task) {
  * @param pos - The position to attach to. If unspecified, adds to the end.
  */
 Board.prototype.putTask = function (task, cat, pos) {
-  // TODO Check if cat is reasonable and throw error otherwise
-  task.category = cat === undefined ? this.currentTemplate.def : cat;
+  if (cat !== undefined && this.currentTemplate.categories.has(cat))
+    task.category = cat;
+  else task.category = this.currentTemplate.def;
+
   const categoryNode = this.categoryNodes[task.category];
   const tasks = Array.from(categoryNode.children)
     .map(node => this.tasks.get(node.dataset.created));

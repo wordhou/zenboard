@@ -118,8 +118,7 @@ Board.prototype.removeTaskFromCategory = function (task) {
 Board.prototype.putTask = function (task, cat, pos) {
   var _this4 = this;
 
-  // TODO Check if cat is reasonable and throw error otherwise
-  task.category = cat === undefined ? this.currentTemplate.def : cat;
+  if (cat !== undefined && this.currentTemplate.categories.has(cat)) task.category = cat;else task.category = this.currentTemplate.def;
   var categoryNode = this.categoryNodes[task.category];
   var tasks = Array.from(categoryNode.children).map(function (node) {
     return _this4.tasks.get(node.dataset.created);
@@ -806,7 +805,7 @@ State.prototype._addHandlers = function () {
 
     _this12.board.putTask(task);
 
-    task.node.focus();
+    task.nodes.text.focus();
 
     _this12.board.saveTasks();
   });

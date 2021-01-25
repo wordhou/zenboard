@@ -2,6 +2,7 @@ const { parallel, series, src, dest } = require('gulp');
 const babel = require('gulp-babel');
 const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
+const fileinclude = require('gulp-file-include');
 
 const buildJs = function (done) {
   return (
@@ -31,6 +32,7 @@ const buildCss = function (done) {
 const buildHtml = function (done) {
   return (
     src('./src/index.html')
+    .pipe(fileinclude())
     .pipe(dest('./dist'))
   );
 };

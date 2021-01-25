@@ -203,7 +203,7 @@ State.prototype._addHandlers = function () {
   this.nodes.newTask.addEventListener('click', () => {
     const task = this.board.newTask();
     this.board.putTask(task);
-    task.node.focus();
+    task.nodes.text.focus();
     this.board.saveTasks();
   });
 
