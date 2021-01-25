@@ -1,4 +1,12 @@
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
@@ -251,7 +259,6 @@ Board.prototype.makeTasksDraggable = function () {
   var _this8 = this;
 
   this.dragNewTaskHandler = function (event) {
-    console.log('dragNewTaskHandler');
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setDragImage(_this8.dummyTask, 0, 0);
 
@@ -320,7 +327,6 @@ Board.prototype.makeTasksDraggable = function () {
     event.target.classList.remove('drop-hover');
 
     if (_this8.list) {
-      console.log('Dragging new task into list mode.');
       var elem = event.target;
 
       while (!elem.classList.contains('task-drop-target')) {
@@ -381,10 +387,9 @@ Board.prototype.makeTasksDraggable = function () {
 
 Board.prototype.loadTasks = function () {
   var tasksStored = localStorage.getItem("tasks-".concat(this.name));
-  var tasksStr = tasksStored !== null ? tasksStored : 'null';
   if (tasksStored === null) return this.tasks = new Map();
-  return this.tasks = new Map(JSON.parse(tasksStr).map(function (props) {
-    return [props.created, new Task(props)];
+  return this.tasks = new Map(JSON.parse(tasksStored).map(function (props) {
+    return [props.id, Task.fromJSON(props)];
   }));
 };
 
@@ -494,7 +499,6 @@ Board.prototype.saveTasks = function () {
   if (this.tasks === undefined) return;
   var taskJSON = Array.from(this.tasks.values());
   var taskString = JSON.stringify(taskJSON);
-  console.log('Saving tasks:', taskJSON);
   localStorage.setItem("tasks-".concat(this.name), taskString);
 };
 
@@ -858,10 +862,10 @@ function Task(_ref3) {
       created = _ref3.created;
   this.text = text;
   this.due = due;
-  this.done = done;
-  this.pin = pin;
-  this.flag = flag;
-  this.expand = expand;
+  this.done = !!done;
+  this.pin = !!pin;
+  this.flag = !!flag;
+  this.expand = !!expand;
   this.x = x;
   this.y = y;
   this.z = z;
@@ -869,33 +873,52 @@ function Task(_ref3) {
   this.order = order;
   this.created = created === undefined ? new Date().toJSON() : created;
   this.render();
-  this.node.style.left = "".concat(this.x, "px");
-  this.node.style.top = "".concat(this.y, "px");
+  this.setStyles();
 } // List of property names that are stored in localStorage
 
 
-Task.storableProperties = ['text', 'due', 'done', 'pin', 'flag', 'expand', 'x', 'y', 'z', 'category', 'order', 'created'];
-Task.MAX_WIDTH = 300;
+Task.storableProps = {
+  'text': 't',
+  'due': 'u',
+  'done': 'd',
+  'pin': 'p',
+  'flag': 'f',
+  'expand': 'e',
+  'x': 'x',
+  'y': 'y',
+  'z': 'z',
+  'category': 'c',
+  'order': 'o',
+  'created': 'id'
+};
 Task.flags = ['done', 'pin', 'flag', 'expand'];
 
 Task.prototype.toJSON = function () {
   var obj = {};
 
-  var _iterator3 = _createForOfIteratorHelper(Task.storableProperties),
-      _step3;
+  for (var _i = 0, _Object$entries = Object.entries(Task.storableProps); _i < _Object$entries.length; _i++) {
+    var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+        k = _Object$entries$_i[0],
+        v = _Object$entries$_i[1];
 
-  try {
-    for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-      var key = _step3.value;
-      obj[key] = this[key];
-    }
-  } catch (err) {
-    _iterator3.e(err);
-  } finally {
-    _iterator3.f();
+    if (Task.flags.includes(k)) obj[v] = this[k] ? 1 : 0;else obj[v] = this[k];
   }
 
   return obj;
+};
+
+Task.fromJSON = function (obj) {
+  var props = {};
+
+  for (var _i2 = 0, _Object$entries2 = Object.entries(Task.storableProps); _i2 < _Object$entries2.length; _i2++) {
+    var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2),
+        k = _Object$entries2$_i[0],
+        v = _Object$entries2$_i[1];
+
+    props[k] = obj[v];
+  }
+
+  return new Task(props);
 };
 /** Populates the .node property with a generated HTML element */
 
@@ -1075,7 +1098,6 @@ Template.getTemplate = function (template) {
 };
 
 Template.renderTemplateListing = function (template) {
-  console.log('rendinging template', template);
   var element = document.createElement('li');
   element.className = 'template-listing';
   element.innerHTML = "<h1>".concat(template.name, "</h1>\n    ").concat(template.description);
@@ -1083,21 +1105,21 @@ Template.renderTemplateListing = function (template) {
 };
 
 Template.getCatFromClassList = function (elem) {
-  var _iterator4 = _createForOfIteratorHelper(elem.classList.values()),
-      _step4;
+  var _iterator3 = _createForOfIteratorHelper(elem.classList.values()),
+      _step3;
 
   try {
-    for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-      var s = _step4.value;
+    for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+      var s = _step3.value;
 
       if (s.substr(0, 4) === 'cat-') {
         return s.substr(4);
       }
     }
   } catch (err) {
-    _iterator4.e(err);
+    _iterator3.e(err);
   } finally {
-    _iterator4.f();
+    _iterator3.f();
   }
 };
 

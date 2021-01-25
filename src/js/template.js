@@ -73,7 +73,6 @@ Template.getTemplate = function (template) {
 }
 
 Template.renderTemplateListing = function (template) {
-  console.log('rendinging template', template);
   const element = document.createElement('li');
   element.className = 'template-listing';
   element.innerHTML = `<h1>${template.name}</h1>

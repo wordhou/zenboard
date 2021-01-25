@@ -15,10 +15,10 @@ function Task (
     , created}) {
   this.text = text;
   this.due = due;
-  this.done = done;
-  this.pin = pin;
-  this.flag = flag;
-  this.expand = expand;
+  this.done = !!done;
+  this.pin = !!pin;
+  this.flag = !!flag;
+  this.expand = !!expand;
   this.x = x;
   this.y = y;
   this.z = z;
@@ -26,24 +26,43 @@ function Task (
   this.order = order;
   this.created = created === undefined ? (new Date()).toJSON() : created;
   this.render();
-  this.node.style.left = `${this.x}px`;
-  this.node.style.top = `${this.y}px`;
+  this.setStyles();
 }
 
 // List of property names that are stored in localStorage
-Task.storableProperties = ['text', 'due', 'done', 'pin', 'flag', 'expand',
-  'x', 'y', 'z', 'category', 'order', 'created'];
+Task.storableProps = {
+  'text': 't',
+  'due' : 'u',
+  'done': 'd',
+  'pin': 'p',
+  'flag': 'f',
+  'expand': 'e',
+  'x': 'x',
+  'y': 'y',
+  'z': 'z',
+  'category': 'c',
+  'order': 'o',
+  'created': 'id'
+};
 
-Task.MAX_WIDTH = 300;
 Task.flags = ['done', 'pin', 'flag', 'expand'];
 
 Task.prototype.toJSON = function () {
   const obj = {};
-  for ( let key of Task.storableProperties ) {
-    obj[key] = this[key];
+  for (let [k, v] of Object.entries(Task.storableProps)) {
+    if (Task.flags.includes(k))
+      obj[v] = this[k] ? 1 : 0;
+    else
+      obj[v] = this[k];
   }
   return obj;
 };
+
+Task.fromJSON = function (obj) {
+  const props = {};
+  for (let [k,v] of Object.entries(Task.storableProps)) props[k] = obj[v];
+  return new Task(props);
+}
 
 /** Populates the .node property with a generated HTML element */
 Task.prototype.render = function () {

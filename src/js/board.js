@@ -167,7 +167,6 @@ Board.prototype.addHandlers = function () {
 /** Attaches all event listeners to the DOM element for a task */
 Board.prototype.makeTasksDraggable = function () {
   this.dragNewTaskHandler = event => {
-    console.log('dragNewTaskHandler');
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setDragImage(this.dummyTask, 0, 0);
 
@@ -230,7 +229,6 @@ Board.prototype.makeTasksDraggable = function () {
     event.target.classList.remove('drop-hover');
 
     if (this.list) {
-      console.log('Dragging new task into list mode.');
       var elem = event.target;
       while (!elem.classList.contains('task-drop-target')) {
         if (elem == document.body) return false;
@@ -283,12 +281,11 @@ Board.prototype.makeTasksDraggable = function () {
 /** Loads from localStorage to populate the tasks property with Tasks */
 Board.prototype.loadTasks = function () {
   const tasksStored = localStorage.getItem(`tasks-${this.name}`);
-  const tasksStr = tasksStored !== null ? tasksStored : 'null';
-
   if (tasksStored === null) return this.tasks = new Map();
 
-  return this.tasks = new Map(JSON.parse(tasksStr).map( props =>
-    [props.created, new Task(props)]));
+  return this.tasks = new Map(JSON.parse(tasksStored).map(props =>
+    [props.id, Task.fromJSON(props)]
+  ));
 };
 
 Board.prototype.loadTemplate = function () {
@@ -409,7 +406,6 @@ Board.prototype.saveTasks = function () {
   if (this.tasks === undefined) return;
   const taskJSON = Array.from(this.tasks.values());
   const taskString = JSON.stringify(taskJSON);
-  console.log('Saving tasks:', taskJSON);
   localStorage.setItem(`tasks-${this.name}`, taskString);
 };
 
