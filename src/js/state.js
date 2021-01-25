@@ -5,7 +5,7 @@
  * loading information from localStorage.
  */
 function State ({ boardList, board, spinner, newTask, newBoard
-  , deleteBoard, toggleView}) {
+  , deleteBoard, listView}) {
   this.nodes = {
     board,
     boardList,
@@ -13,7 +13,7 @@ function State ({ boardList, board, spinner, newTask, newBoard
     newTask,
     newBoard,
     deleteBoard,
-    toggleView
+    listView
   };
 }
 
@@ -55,8 +55,8 @@ State.prototype._setBoard = function (board) {
   this.current = board.name;
   this.board = board;
   if (board.tasks === undefined) board.loadTasks();
-  if (!board.list) this.nodes.toggleView.classList.remove('on');
-  if (board.list) this.nodes.toggleView.classList.add('on');
+  if (!board.list) this.nodes.listView.classList.remove('on');
+  if (board.list) this.nodes.listView.classList.add('on');
   board.attach(this.nodes.board, this.nodes.spinner);
 
   // Make sure the selected board has class 'on'
@@ -156,7 +156,6 @@ State.prototype.newBoard = function () {
 };
 
 State.prototype._deleteBoard = function (boardName) {
-  console.log('deleting');
   const board = this.boards.get(boardName);
   board.deleteTasksFromStorage();
   board.listingNode.remove();
@@ -184,7 +183,7 @@ State.prototype._addHandlers = function () {
   window.addEventListener('resize', () => {
     if (this.board.list) return false;
     if (this.board.node.offsetWidth <= State.MIN_BOARD_WIDTH)
-      return this.toggleView();
+      return this.toggleListView();
     this.board.moveTasksIntoView();
   });
   document.addEventListener('boardselect', event => {
@@ -193,7 +192,6 @@ State.prototype._addHandlers = function () {
 
   document.addEventListener('renameboard', event => {
     const success = this.renameBoard( event.detail.board, event.detail.newName );
-    console.log('Was rename successful?', success);
     // Indicates to the event dispatcher that the rename was unsuccessful
     if (!success) event.preventDefault();
   }, { passive: false });
@@ -212,16 +210,21 @@ State.prototype._addHandlers = function () {
   });
 
   this.nodes.newBoard.addEventListener('click', () => this.newBoard());
-  this.nodes.deleteBoard.addEventListener('click', () => this.deleteBoard());
-  this.nodes.toggleView.addEventListener('click', () => {
-    this.toggleView();
-  });
+  this.nodes.deleteBoard.addEventListener('click', () =>
+    this.deleteBoard()
+);
+  this.nodes.toggleListView.addEventListener('click', () =>
+    this.toggleListView()
+  );
 };
 
-State.prototype.toggleView = function () {
+State.prototype.toggleListView = function () {
   this.board.list = !this.board.list;
-  this.board.node.classList.toggle('list-view');
-  if (!this.board.list) this.nodes.toggleView.classList.remove('on');
-  if (this.board.list) this.nodes.toggleView.classList.add('on');
   this.save();
+  this.setBoardStyles();
 };
+
+State.prototype.setBoardStyles = function () {
+  this.board.node.classList.toggle('list-view', this.board.list);
+  this.nodes.listView.classList.toggle('on', this.board.list);
+}

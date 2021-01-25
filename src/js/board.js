@@ -181,10 +181,11 @@ Board.prototype.makeTasksDraggable = function () {
 
   const dragstartHandler = event => {
     event.stopPropagation();
-    // Check whether ancestor contains class
     let elem = event.target;
-    while (!elem.classList.contains('todo') && elem !== document)
+    while (!elem.classList.contains('todo') && elem !== document) {
+      if (elem.classList === undefined || elem === document) return false;
       elem = elem.parentNode;
+    }
     if (!elem.classList.contains('todo')) return false;
 
     const task = this.tasks.get(elem.dataset.created);
@@ -223,7 +224,9 @@ Board.prototype.makeTasksDraggable = function () {
 
   const dropHandler = event => {
     event.preventDefault();
-    const data = JSON.parse(event.dataTransfer.getData('text/plain'));
+    const dataString = event.dataTransfer.getData('text/plain');
+    if (dataString === "") return console.error('Weird drop events');
+    const data = JSON.parse(dataString);
     let task;
 
     event.target.classList.remove('drop-hover');
