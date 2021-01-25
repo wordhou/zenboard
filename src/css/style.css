@@ -34,8 +34,12 @@ body {
   align-items: stretch;
 }
 
-#toggle-view.on {
-  fill: lightsteelblue;
+#template-list-expand {
+  display: none;
+  position: absolute;
+}
+#template-list-expand.expanded {
+  display: block;
 }
 
 .indicator .open,
@@ -48,10 +52,5 @@ body {
   display: block;
 }
 
-#template-list-expand {
-  display: none;
-  position: absolute;
-}
-#template-list-expand.expanded {
-  display: block;
+.tooltip.on .tooltip-text {
 }

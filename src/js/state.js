@@ -58,7 +58,11 @@ State.prototype._setBoard = function (board) {
   if (!board.list) this.nodes.toggleView.classList.remove('on');
   if (board.list) this.nodes.toggleView.classList.add('on');
   board.attach(this.nodes.board, this.nodes.spinner);
-  this._styleActiveListing();
+
+  // Make sure the selected board has class 'on'
+  for (let board of this.boards.values())
+    board.listingNode.classList.toggle('on', this.current === board.name);
+
   this.save();
 };
 
@@ -72,13 +76,6 @@ State.prototype.changeTemplate = function (templateName, board) {
   }
   this.save();
 }
-
-State.prototype._styleActiveListing = function () {
-  for (let board of this.boards.values()) {
-    board.listingNode.classList.toggle('on', this.current === board.name);
-    // TODO This doesn't seem right
-  }
-};
 
 /** */
 State.prototype.save = function () {

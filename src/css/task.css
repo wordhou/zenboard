@@ -35,6 +35,7 @@
 
 .todo textarea,
 .todo input {
+  font: 1em "Roboto", Helvetica, sans-serif;
   border: none;
   overflow: auto;
   outline: none;
@@ -48,7 +49,6 @@
   margin: 0;
   width: 100%;
   height: auto;
-  font: 1em "Roboto", Helvetica, sans-serif;
 }
 
 .todo textarea:focus {
