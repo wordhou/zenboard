@@ -206,8 +206,17 @@ Board.prototype.makeTasksDraggable = function () {
   const dragoverHandler = event => {
     event.preventDefault();
     if (!this.list) return false;
+    if (event.target.classList === undefined) return false;
     if (event.target.classList.contains('task-drop-target')) {
       event.target.classList.add('drop-hover');
+    }
+  };
+
+  const dragleaveHandler = event => {
+    if (!this.list) return false;
+    if (event.target.classList === undefined) return false;
+    if (event.target.classList.contains('task-drop-target')) {
+      event.target.classList.remove('drop-hover');
     }
   };
 
@@ -230,6 +239,9 @@ Board.prototype.makeTasksDraggable = function () {
         ? this.newTask() : this.tasks.get(data.task);
 
       if (elem.classList.contains('task-container')) {
+        this.moveTaskToCategory(task, Template.getCatFromClassList(elem));
+      }
+      if (elem.classList.contains('category')) {
         this.moveTaskToCategory(task, Template.getCatFromClassList(elem));
       }
       if (elem.classList.contains('todo')) {
@@ -259,12 +271,7 @@ Board.prototype.makeTasksDraggable = function () {
 
   this.node.addEventListener('dragstart', dragstartHandler);
   this.node.addEventListener('dragover', dragoverHandler);
-  this.node.addEventListener('dragleave', event => {
-    if (!this.list) return false;
-    if (event.target.classList.contains('task-drop-target')) {
-      event.target.classList.remove('drop-hover');
-    }
-  });
+  this.node.addEventListener('dragleave', dragleaveHandler);
   this.node.addEventListener('drop', dropHandler);
   this.node.addEventListener('dragend', event => {
     event;//TODO anything else?

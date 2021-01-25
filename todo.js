@@ -13,7 +13,10 @@ window.addEventListener('load', () => {
   const $ = id => document.getElementById(id); // Alias for brevity
 
   makeExpandible($('board-drawer'), $('board-drawer-handle'));
-  makeExpandible($('template-list-content'), $('template-list-expander'));
+  makeExpandible($('template-list-expand'),
+    $('template-list-expander'),
+    $('template-list-exit')
+  );
   state = new State({
     board: $('board-wrapper'),
     boardList: $('board-list-content'),

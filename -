@@ -13,7 +13,7 @@ body {
   flex: 0;
   font: bold 2em "Lato", Helvetica, sans-serif;
   color: white;
-  background-color: #7ec25a;
+  background-color: #6ec24a;
   padding-top: 0.5em;
   padding-left: 2em;
   padding-bottom: 0.5em;

@@ -1,12 +1,14 @@
 .todo {
-  font-family: Helvetica;
-  font-size: inherit;
-  height: auto;
-  box-shadow: 1 2px 5px rgba(0, 0, 0, 0.3);
-  background-color: lightgoldenrodyellow;
-  border-radius: 10px;
+  font-size: 1.1em;
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.3);
+  border-radius: 1em;
   overflow: auto;
   padding: 0.5em;
+  background-color: lightgoldenrodyellow;
+}
+
+.board.list-view .todo {
+  box-shadow: none;
 }
 
 .todo.dummy {
@@ -46,14 +48,25 @@
   margin: 0;
   width: 100%;
   height: auto;
-  font-size: inherit;
-  font-family: Helvetica;
+  font: 1em "Roboto", Helvetica, sans-serif;
 }
 
 .todo textarea:focus {
 }
 
 .todo .due {
+}
+
+.todo.done textarea {
+  font-style: italic;
+  color: darkslategrey;
+}
+
+.todo.flag {
+  background-color: peachpuff;
+}
+.todo.flag textarea {
+  background-color: peachpuff;
 }
 
 .todo .expandible {
@@ -88,13 +101,6 @@ ul.icons a svg {
 ul.icons svg symbol {
   width: 1.2em;
   height: 1.2em;
-}
-
-.todo.done {
-}
-
-.todo.flag {
-  background-color: lightsalmon;
 }
 
 .todo.done .done svg {

@@ -1,11 +1,14 @@
 #board-drawer {
   margin-left: -20rem;
-  font-size: 0.8rem;
   background-color: ghostwhite;
+
+  font: 1rem;
 
   display: flex;
   flex-flow: row;
   transition: 0.5s all ease;
+
+  z-index: 10001;
 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
@@ -20,31 +23,61 @@
 }
 
 #board-drawer-handle {
-  background-color: yellow;
   width: 1.5em;
+  border-left: 1px solid lightgrey;
 
   display: flex;
   justify-content: center;
   flex-direction: column;
 }
 
+#board-drawer-handle:hover {
+  background-color: #fdfdfe;
+}
+
 #board-list header {
-  background-color: lightsteelblue;
+  border-bottom: 1px solid lightgrey;
   display: flex;
   flex-flow: column;
   padding: 0.5em;
+  color: black;
+  fill: black;
+}
+
+#board-list header {
+  font: 1em "Lato", Helvetica, sans-serif;
+}
+#board-list header h1 {
+  font: bold 1.3em "Lato", Helvetica, sans-serif;
 }
 
 #board-list header nav {
+  margin-top: 0.5em;
   display: flex;
   flex-flow: row;
   justify-content: space-between;
 }
 
 #board-list header nav a {
+  border-radius: 0.4em;
+  padding: 0.4em;
   display: flex;
   flex-flow: column;
   align-items: center;
+  font: 1em "Roboto", Helvetica, sans-serif;
+  background-color: inherit;
+}
+
+#board-list header nav a:hover {
+  background-color: #ccc;
+  color: black;
+  fill: black;
+}
+
+#board-list header nav a:active {
+  background-color: #777;
+  color: white;
+  fill: white;
 }
 
 #board-list header nav svg,
@@ -62,15 +95,29 @@
   width: 100%;
 }
 
+#board-list-content {
+  padding: 0.25em 0.5em;
+}
+
 .board-listing-component {
-  border: thin solid grey;
+  font-size: 1em;
+  padding: 0.5em;
   display: flex;
   flex-flow: row nowrap;
 }
 
 .board-listing-component.on {
-  font-weight: bold;
-  background-color: lightgray;
+  border-radius: 0.5em;
+  background-color: #e0f2d8;
+}
+
+.listing-name .field h1 {
+  font: bold 1em "Lato", Helvetica, sans-serif;
+}
+
+.listing-main .field h2 {
+  color: darkslategrey;
+  font-size: 1em;
 }
 
 .listing-icon {
@@ -115,15 +162,8 @@
   background: transparent;
   resize: none;
   min-height: 1em;
-}
-
-.listing-name .field h1 {
-  font-size: 1.5em;
-}
-
-.listing-main .field h2 {
-  font-size: 1em;
-  color: darkslategrey;
+  width: 100%;
+  font: 1em "Roboto", Helvetica, sans-serif;
 }
 
 .field .dyntext,

@@ -20,11 +20,17 @@ const autoResize = function (text) {
   setTimeout(resizeTextarea, 0);
 };
 
-function makeExpandible (expandible, handle) {
+function makeExpandible (expandible, handle, exitButton) {
   handle.addEventListener('click', () => {
     expandible.classList.toggle('expanded');
-    handle.classList.toggle('expanded');
+    handle.classList.toggle('on');
   });
+  if (exitButton !== undefined) {
+    exitButton.addEventListener('click', () => {
+      expandible.classList.remove('expanded');
+      handle.classList.remove('on');
+    });
+  }
 }
 
 /**

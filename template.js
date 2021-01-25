@@ -54,16 +54,17 @@ Template.templates = new Map (
 );
 
 Template.prototype.attachCategories = function (target, map, stylesheet) {
-  this.categories.forEach ( (cat, catName) => {
+  this.categories.forEach ( (cat, name) => {
     const element = document.createElement('div');
-    element.className = 'category';
-    element.innerHTML = `<header>${cat.title}</header>
-    <div class="task-container cat-${catName} task-drop-target"></div>`;
+    element.className = `category cat-${name} task-drop-target`;
+    element.innerHTML = `<header><h1>${cat.title}</h1></header>
+    <div class="task-container cat-${name} task-drop-target"></div>`;
 
-    map[catName] = element.lastChild;
+    map[name] = element.lastChild;
     target.appendChild(element);
   });
-  for (let i in this.styles) stylesheet.cssRules[i] = this.styles[i];
+  for (let i in this.styles)
+    stylesheet.cssRules.insertRule(this.styles[i], i);
 }
 
 

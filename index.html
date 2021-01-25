@@ -5,7 +5,6 @@
   <title>Visual todo app</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
-
   <link rel="stylesheet" href="reset.css"></link>
   <link rel="stylesheet" href="boards-drawer.css"></link>
   <link rel="stylesheet" href="style.css" id="style-main"></link>
@@ -36,7 +35,7 @@
               <label>Delete Board</label>
             </a>
             <a id="new-board">
-              <svg><use href="#add" /></svg>
+              <svg><use href="#add-board" /></svg>
               <label>Add Board</label>
             </a>
           </nav>
@@ -44,7 +43,7 @@
       <div id="board-list-content">
       </div>
     </div>
-    <div id="board-drawer-handle" class="indicator expanded">
+    <div id="board-drawer-handle" class="indicator on">
       <span class="open">
         <svg><use href="#chevron-compact-left" /></svg>
       </span>
@@ -72,7 +71,10 @@
           <svg><use href="#bar-chart-steps" /></svg>
           <label>Choose template</label>
         </a>
-        <div id="template-list-content" class="expanded"></div>
+        <div id="template-list-expand">
+          <div id="template-list-content"></div>
+          <a id="template-list-exit">X</a>
+        </div>
       </section>
     </nav>
     <main id="board-wrapper">
@@ -103,9 +105,8 @@
 <symbol viewBox="0 0 16 16" id="trash">
   <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
 </symbol>
-<symbol viewBox="0 0 16 16" id="add">
-  <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5V6z"/>
-  <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+<symbol viewBox="0 0 16 16" id="add-board">
+  <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM8.5 7v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 1 0z"/>
 </symbol>
 <symbol viewBox="0 0 16 16" id="settings">
   <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
