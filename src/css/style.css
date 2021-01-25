@@ -37,7 +37,10 @@ body {
 
 #container > footer {
   flex: 0;
-  background-color: magenta;
+  background-color: black;
+  padding: 0.5em;
+  font: 0.8em "Roboto", Helvetica, sans-serif;
+  color: white;
 }
 
 #middle {

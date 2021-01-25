@@ -213,7 +213,7 @@ State.prototype._addHandlers = function () {
   this.nodes.deleteBoard.addEventListener('click', () =>
     this.deleteBoard()
 );
-  this.nodes.toggleListView.addEventListener('click', () =>
+  this.nodes.listView.addEventListener('click', () =>
     this.toggleListView()
   );
 };

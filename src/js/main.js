@@ -24,7 +24,7 @@ window.addEventListener('load', () => {
     newTask: $('new-task'),
     newBoard: $('new-board'),
     deleteBoard: $('delete-board'),
-    toggleView: $('toggle-view')
+    listView: $('toggle-view')
   });
   state.load();
 
