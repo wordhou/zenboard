@@ -61,10 +61,12 @@
 #board-list header nav a {
   border-radius: 0.4em;
   padding: 0.4em;
+  width: 3.5em;
   display: flex;
   flex-flow: column;
   align-items: center;
-  font: 1em "Roboto", Helvetica, sans-serif;
+  text-align: center;
+  font: bold 0.9em "Roboto", Helvetica, sans-serif;
   background-color: inherit;
 }
 
@@ -82,8 +84,8 @@
 
 #board-list header nav svg,
 #board-list header nav use {
-  width: 30px;
-  height: 30px;
+  width: 2.5em;
+  height: 2.5em;
 }
 
 #board-drawer-handle svg {
@@ -106,18 +108,24 @@
   flex-flow: row nowrap;
 }
 
+.listing-name h1 {
+  font: 1.2em "Lato", Helvetica, sans-serif;
+}
+
+.listing-main h2 {
+  color: darkslategrey;
+  font-size: 1em;
+}
+
 .board-listing-component.on {
   border-radius: 0.5em;
   background-color: #e0f2d8;
 }
 
-.listing-name .field h1 {
-  font: bold 1em "Lato", Helvetica, sans-serif;
-}
-
-.listing-main .field h2 {
-  color: darkslategrey;
-  font-size: 1em;
+.board-listing-component.on .listing-name h1 {
+  font-weight: bold;
+  border-radius: 0.5em;
+  background-color: #e0f2d8;
 }
 
 .listing-icon {
