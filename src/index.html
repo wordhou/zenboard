@@ -10,16 +10,15 @@
 </head>
 <body>
 <div id="container">
-  <header>
-    <h1>Header content</h1>
-  </header>
+<header>
+  <h1>Header content</h1>
+</header>
 
-  <div id="middle">
-
+<div id="middle">
   <nav id="board-drawer" class="expandible expanded">
       <div id="board-list">
         <header>
-            <h1> Your Boards </h1>
+            <h1>Your Boards</h1>
           <nav>
             <a id="delete-board">
               <svg><use href="#trash"/></svg>
@@ -46,18 +45,21 @@
 
   <div id="board-component">
     <nav>
-      <section>
+      <section class="tooltip">
         <a id="new-task" class="button" draggable="true">
         <svg><use href="#plus-circle-fill" /></svg>
         <label>New task</label>
         </a>
+        <aside>Click or drag me to add a new task to the board!</aside>
       </section>
-      <section><a id="toggle-view" class="button">
+      <section class="tooltip">
+        <a id="toggle-view" class="button tooltip">
         <svg><use href="#view-stacked" /></svg>
         <label>Change view</label>
         </a>
+        <aside>Switch between list view or board view</aside>
       </section>
-      <section id="template-list-sec">
+      <section id="template-list-sec" class="tooltip">
         <a id="template-list-expander" class="button">
           <svg><use href="#bar-chart-steps" /></svg>
           <label>Choose template</label>
@@ -66,6 +68,7 @@
           <div id="template-list-content"></div>
           <a id="template-list-exit">X</a>
         </div>
+        <aside>Templates determine the categories and shape of your board</aside>
       </section>
     </nav>
     <main id="board-wrapper">
@@ -74,9 +77,8 @@
 </div>
 
 <footer><h1>Footer content</h1> </footer>
+</div>
     <!-- SVG Symbols for use throughout application -->
-
     @@include('./bootstrap-icons.svg');
-
 </body>
 </html>

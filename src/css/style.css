@@ -41,16 +41,3 @@ body {
 #template-list-expand.expanded {
   display: block;
 }
-
-.indicator .open,
-.indicator.on .close {
-  display: none;
-}
-
-.indicator.on .open,
-.indicator .close {
-  display: block;
-}
-
-.tooltip.on .tooltip-text {
-}
