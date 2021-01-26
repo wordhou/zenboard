@@ -151,6 +151,7 @@ Board.prototype.attach = function (target, spinner) {
   if (spinner !== undefined) spinner.classList.add('on');
   if (this.node === undefined) this.render();
   target.innerHTML = '';
+  target.appendChild(this.dummyTask);
   target.appendChild(this.node);
   this.currentTemplate.attachStylesheet(target);
   if (spinner !== undefined) spinner.classList.remove('on');

@@ -79,7 +79,6 @@ State.prototype.changeTemplate = function (templateName, board) {
 
 /** */
 State.prototype.save = function () {
-  console.log('Saving settings and board info.');
   localStorage.setItem('current', this.current);
   localStorage.setItem('boards', JSON.stringify(
     Array.from(this.boards.values())
