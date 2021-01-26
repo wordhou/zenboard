@@ -6,13 +6,10 @@
   display: block;
 }
 
-#template-list-content {
-}
-
 .template-listing {
   border-radius: 0.25em;
   padding: 0.25em;
-  font: 0.9em "Robot", Helvetica, sans-serif;
+  font: bold 1em "Robot", Helvetica, sans-serif;
 }
 
 .template-listing:hover {
