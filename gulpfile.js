@@ -17,7 +17,7 @@ const buildJs = function (done) {
     src('./src/js/*.js')
     .pipe(concat('app.js'))
     .pipe(fileinclude())
-    .pipe(babel({
+    /*.pipe(babel({
       presets: [
         [ '@babel/env',
           { modules : false}
@@ -25,6 +25,7 @@ const buildJs = function (done) {
       ]
     })
     )
+    */
     //.pipe(uglify())
     .pipe(dest('./dist'))
   );
