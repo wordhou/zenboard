@@ -6,7 +6,7 @@ const fileinclude = require('gulp-file-include');
 
 const buildTemplates = function (done) {
   return (
-    src('./src/templates/*.js')
+    src('./src/templates/*.json')
     .pipe(concat('templates.build.js'))
     .pipe(dest('./src/templates/'))
   );
