@@ -4,10 +4,19 @@ const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
 const fileinclude = require('gulp-file-include');
 
+const buildTemplates = function (done) {
+  return (
+    src('./src/templates/*.js')
+    .pipe(concat('templates.build.js'))
+    .pipe(dest('./src/templates/'))
+  );
+}
+
 const buildJs = function (done) {
   return (
     src('./src/js/*.js')
     .pipe(concat('app.js'))
+    .pipe(fileinclude())
     .pipe(babel({
       presets: [
         [ '@babel/env',
@@ -37,4 +46,7 @@ const buildHtml = function (done) {
   );
 };
 
-exports.default = parallel(buildJs, buildCss, buildHtml);
+exports.default = parallel(
+  series(buildTemplates, buildJs),
+  buildCss,
+  buildHtml);

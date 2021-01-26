@@ -1,5 +1,4 @@
 /* global $, dist, clamp, autoResize, makeDynamicField, Template, Task, mex */
-
 /** Stores the state of a board. @constructor */
 function Board({
   name = '',
@@ -15,6 +14,7 @@ function Board({
   this.loadTemplate();
 }
 
+Board.BASE_Z_INDEX = 5;
 Board.storableProperties = ['name', 'description', 'template',  'list'];
 
 Board.prototype.toJSON = function () {
@@ -138,7 +138,6 @@ Board.prototype.render = function () {
   element.classList.add('board');
   if (this.list) element.classList.add('list-view');
   this.node = element;
-
   this.categoryNodes = {};
   this.currentTemplate.attachCategories(this.node, this.categoryNodes);
 
@@ -151,11 +150,11 @@ Board.prototype.render = function () {
 Board.prototype.attach = function (target, spinner) {
   if (spinner !== undefined) spinner.classList.add('on');
   if (this.node === undefined) this.render();
-  // Replaces the element `<div id="board">` with our new element
   target.innerHTML = '';
-  target.appendChild(this.dummyTask);
   target.appendChild(this.node);
+  this.currentTemplate.attachStylesheet(target);
   if (spinner !== undefined) spinner.classList.remove('on');
+  this.moveTasksIntoView();
 };
 
 Board.prototype.addHandlers = function () {
@@ -426,5 +425,3 @@ Board.prototype.markChanged = function () {
   const e = new CustomEvent('boardchange', { bubbles: true });
   this.listingNode.dispatchEvent(e);
 };
-
-Board.BASE_Z_INDEX = 5;

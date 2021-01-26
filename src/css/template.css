@@ -1,0 +1,7 @@
+#template-list-expand {
+  display: none;
+  position: absolute;
+}
+#template-list-expand.expanded {
+  display: block;
+}

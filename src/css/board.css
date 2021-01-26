@@ -76,7 +76,6 @@
 .board {
   flex: 1;
   position: relative;
-  background-color: lightgray;
   display: flex;
   flex-flow: row wrap;
   /* z-index: -10; */
@@ -106,7 +105,7 @@
 .drop-hover .task-container,
 .task-container.drop-hover {
   border-radius: 1em;
-  background-color: gray;
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .board.list-view .task-container {
@@ -131,8 +130,9 @@
 }
 
 .category header {
-  padding: 0.8em;
   text-align: center;
+  margin: 1em;
+  padding: 0.8em;
 }
 
 .category header h1 {

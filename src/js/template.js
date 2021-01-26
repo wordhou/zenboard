@@ -1,59 +1,25 @@
 /**
  * Defines the background, styles, categories of a board.
  */
-function Template({ name, description, categories, def }) {
+function Template({ name, description, categories, def, styles }) {
   this.name = name;
   this.description = description;
   this.categories = new Map(categories);
   this.def = def;
+  this.styles = styles
 }
 
 Template.default = 'Default';
 
 Template.templates = new Map (
 [
-  {
-    "name": "Default",
-    "description": "",
-    "categories": [
-      ["Todo", {
-        "title": "Todo list",
-        "styles": {}
-      }]
-    ],
-    "styles": [
-      "",
-      "",
-    ],
-    "def": "Todo"
-  },
-  {
-    "name": "Trifold",
-    "description": "",
-    "categories": [
-      ["Todo", {
-        "title": "Todo list",
-        "styles": {}
-      }],
-      ["Inprogress", {
-        "title": "In progress",
-        "styles": {}
-      }],
-      ["Complete", {
-        "title": "Completed",
-        "styles": {}
-      }],
-    ],
-    "styles": [
-      "",
-      "",
-    ],
-    "def": "Todo"
-  },
+  // eslint-disable-next-line
+  @@include('../templates/templates.build.js')
+
 ].map( t => [t.name, new Template(t)])
 );
 
-Template.prototype.attachCategories = function (target, map, stylesheet) {
+Template.prototype.attachCategories = function (target, map) {
   this.categories.forEach ( (cat, name) => {
     const element = document.createElement('div');
     element.className = `category cat-${name} task-drop-target`;
@@ -63,9 +29,17 @@ Template.prototype.attachCategories = function (target, map, stylesheet) {
     map[name] = element.lastChild;
     target.appendChild(element);
   });
-  for (let i in this.styles)
-    stylesheet.cssRules.insertRule(this.styles[i], i);
 }
+
+Template.prototype.attachStylesheet = function (target) {
+  const style = document.createElement('style');
+  style.appendChild(document.createTextNode(""));
+  target.appendChild(style);
+  for (let i in this.styles) {
+    console.log(i,this.styles[i]);
+    style.sheet.insertRule(this.styles[i], i);
+  }
+};
 
 
 Template.getTemplate = function (template) {
