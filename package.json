@@ -1,6 +1,6 @@
 {
-  "name": "visual-todo",
-  "version": "1.0.0",
+  "name": "wh-zenboard",
+  "version": "0.1.0",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wordhou/visual-todo.git"
+    "url": "git+https://github.com/wordhou/zenboard.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/wordhou/visual-todo/issues"
+    "url": "https://github.com/wordhou/zenboard/issues"
   },
   "homepage": "https://github.com/wordhou/visual-todo#readme",
   "devDependencies": {

@@ -8,7 +8,7 @@
   flex-flow: row;
   transition: 0.5s all ease;
 
-  z-index: 10001;
+  z-index: 1001;
 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
