@@ -297,9 +297,9 @@ Board.prototype.loadTemplate = function () {
 
 Board.prototype.moveTaskToTop = function (task) {
   const tasks = Array.from(this.tasks.values());
-  const zs = tasks.map(t => t === task ? null : t.z);
   if (task.z !== undefined)
     this.tasks.forEach(t => { if (t.z > task.z) t.z--; t.setStyles(); });
+  const zs = tasks.map(t => t === task ? null : t.z);
   let mex = Board.BASE_Z_INDEX;
   while (zs.includes(mex)) mex++;
   task.z = mex;

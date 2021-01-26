@@ -36,7 +36,6 @@ Template.prototype.attachStylesheet = function (target) {
   style.appendChild(document.createTextNode(""));
   target.appendChild(style);
   for (let i in this.styles) {
-    console.log(i,this.styles[i]);
     style.sheet.insertRule(this.styles[i], i);
   }
 };
